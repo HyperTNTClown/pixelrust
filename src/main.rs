@@ -8,6 +8,9 @@ mod pixel_map;
 mod pixel;
 mod render_thread;
 
+static WIDTH: u32 = 1280;
+static HEIGHT: u32 = 720;
+
 fn main() {
 	let runtime = tokio::runtime::Builder::new_multi_thread()
 		.enable_all()
@@ -47,6 +50,19 @@ async fn handle_connection(socket: std::net::TcpStream, pixel_map: Arc<RwLock<Pi
 			"PX" => {
 				let x = split.next().unwrap().parse::<u32>().unwrap();
 				let y = split.next().unwrap().parse::<u32>().unwrap();
+				match (x,y) {
+					coords
+					if coords.0 == WIDTH || coords.1 == HEIGHT => {
+						socket.try_write("ERR: 0 based index...\n".as_bytes()).unwrap();
+						continue;
+					}
+					coords
+					if coords.0 > WIDTH || coords.1 > HEIGHT => {
+						socket.try_write("ERR: Out of Bounds (Tip: SIZE)\n".as_bytes()).unwrap();
+						continue;
+					}
+					_ => {}
+				}
 				let next = split.next();
 				if next.is_none() {
 					socket.try_write(format!("PX {} {} {}\n", x, y, pixel_map.read().unwrap().get_pixel(x, y).as_string()).as_bytes()).unwrap();

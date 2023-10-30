@@ -7,11 +7,10 @@
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cf8aacae-9b81-4c86-a622-7634722ef1d5" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/pixel.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/pixel_map.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/render_thread.rs" afterDir="false" />
+    <list default="true" id="cf8aacae-9b81-4c86-a622-7634722ef1d5" name="Changes" comment="Add .gitignore, Cargo.lock and Cargo.toml for new Rust project&#10;&#10;Added .gitignore file to exclude unnecessary files from git. Initialised new Rust project with Cargo.toml. This contains project description and dependencies such as Tokio, mjpeg_rs, etc. Also, added Cargo.lock which ensures that multiple builds of the same package will resolve and build identical copies of dependencies.">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pixel_map.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/pixel_map.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -132,11 +131,24 @@
       <workItem from="1698301159143" duration="8155000" />
       <workItem from="1698384090913" duration="8646000" />
       <workItem from="1698421752501" duration="17145000" />
-      <workItem from="1698559527610" duration="6780000" />
+      <workItem from="1698559527610" duration="8197000" />
     </task>
+    <task id="LOCAL-00001" summary="Add .gitignore, Cargo.lock and Cargo.toml for new Rust project&#10;&#10;Added .gitignore file to exclude unnecessary files from git. Initialised new Rust project with Cargo.toml. This contains project description and dependencies such as Tokio, mjpeg_rs, etc. Also, added Cargo.lock which ensures that multiple builds of the same package will resolve and build identical copies of dependencies.">
+      <option name="closed" value="true" />
+      <created>1698653124752</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1698653124752</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Add .gitignore, Cargo.lock and Cargo.toml for new Rust project&#10;&#10;Added .gitignore file to exclude unnecessary files from git. Initialised new Rust project with Cargo.toml. This contains project description and dependencies such as Tokio, mjpeg_rs, etc. Also, added Cargo.lock which ensures that multiple builds of the same package will resolve and build identical copies of dependencies." />
+    <option name="LAST_COMMIT_MESSAGE" value="Add .gitignore, Cargo.lock and Cargo.toml for new Rust project&#10;&#10;Added .gitignore file to exclude unnecessary files from git. Initialised new Rust project with Cargo.toml. This contains project description and dependencies such as Tokio, mjpeg_rs, etc. Also, added Cargo.lock which ensures that multiple builds of the same package will resolve and build identical copies of dependencies." />
   </component>
 </project>

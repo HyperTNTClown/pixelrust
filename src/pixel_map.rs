@@ -33,11 +33,11 @@ impl PixelMap {
 	}
 
 	pub fn get_pixel(&self, x: u32, y: u32) -> Pixel {
-		self.pixels[(x + y * self.height.load(Relaxed)) as usize].clone()
+		self.pixels[(y + x * self.height.load(Relaxed)) as usize].clone()
 	}
 
 	pub fn set_pixel(&mut self, x: u32, y: u32, r: u8, g: u8, b: u8) {
-		self.pixels[(x + y * self.height.load(Relaxed)) as usize].set_color(r, g, b);
+		self.pixels[(y + x * self.height.load(Relaxed)) as usize].set_color(r, g, b);
 		self.version.fetch_add(1, SeqCst);
 	}
 
