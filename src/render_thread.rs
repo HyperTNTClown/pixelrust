@@ -1,35 +1,30 @@
 use std::sync::{Arc, RwLock};
+use std::thread;
+use std::thread::sleep;
 use crate::pixel_map::PixelMap;
 use mjpeg_rs::MJpeg;
 
-pub(crate) fn render_thread(pixel_map: Arc<RwLock<PixelMap>>) {
+pub(crate) fn render_thread(pixel_map: Arc<PixelMap>) {
 
 	let m = Arc::new(MJpeg::new());
 	let mrc = m.clone();
 
-	let _pixel_map = Arc::clone(&pixel_map);
+	let pixel_map = Arc::clone(&pixel_map);
 
 	std::thread::spawn(move || {
+		let mut cache = vec![0u8];
+		let (buf, _) = pixel_map.to_img_buffer();
+		m.update_jpeg(buf.clone()).unwrap();
+		cache = buf.clone();
 		loop {
-			let (buf, valid) = match _pixel_map.try_read() {
-				Ok(p) => {
-					let img_buffer = p.to_img_buffer();
-					m.update_jpeg(img_buffer.0.clone()).unwrap();
-					img_buffer
-				},
-				Err(_) => continue
-			};
-
+			let (buf, valid) = pixel_map.to_img_buffer();
 			if valid {
+				m.update_jpeg(cache.clone()).unwrap();
 				continue;
 			}
-
-			match _pixel_map.try_write() {
-				Ok(mut p) => {
-					p.update_cache(buf);
-				},
-				Err(_) => continue
-			}
+			cache = buf.clone();
+			m.update_jpeg(buf).unwrap();
+			thread::sleep(std::time::Duration::from_millis(100));
 		}
 	});
 

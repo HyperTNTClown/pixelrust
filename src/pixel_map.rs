@@ -1,16 +1,14 @@
 use std::sync::atomic::{AtomicU32, AtomicUsize};
 use std::sync::atomic::Ordering::{Relaxed, SeqCst};
 use image::codecs::jpeg::JpegEncoder;
-use image::{ImageBuffer, Rgb};
-use crate::pixel::Pixel;
+use image::{ColorType, ImageBuffer, Pixel, Rgb};
+use crate::color::Color;
 
 pub(crate) struct PixelMap {
-	pixels: Vec<Pixel>,
+	pixels: Vec<AtomicU32>,
 	width: AtomicU32,
 	height: AtomicU32,
-	jpeg_cache: Vec<u8>,
 	version: AtomicUsize,
-	cache_version: AtomicUsize,
 }
 
 
@@ -19,7 +17,7 @@ impl PixelMap {
 		let mut pixels = Vec::new();
 		for x in 0..width {
 			for y in 0..height {
-				pixels.push(Pixel::new(x, y, 0, 0, 0));
+				pixels.push(AtomicU32::new(Color::black().raw()));
 			}
 		}
 		PixelMap {
@@ -27,23 +25,16 @@ impl PixelMap {
 			width: AtomicU32::new(width),
 			height: AtomicU32::new(height),
 			version: AtomicUsize::new(1),
-			jpeg_cache: vec![],
-			cache_version: AtomicUsize::new(0),
 		}
 	}
 
-	pub fn get_pixel(&self, x: u32, y: u32) -> Pixel {
-		self.pixels[(y + x * self.height.load(Relaxed)) as usize].clone()
+	pub fn get_color(&self, x: u32, y: u32) -> Color {
+		Color::new(self.pixels[(x + y * self.width.load(Relaxed)) as usize].load(Relaxed))
 	}
 
-	pub fn set_pixel(&mut self, x: u32, y: u32, r: u8, g: u8, b: u8) {
-		self.pixels[(y + x * self.height.load(Relaxed)) as usize].set_color(r, g, b);
-		self.version.fetch_add(1, SeqCst);
-	}
-
-	pub fn update_cache(&mut self, jpeg: Vec<u8>) {
-		self.jpeg_cache = jpeg;
-		self.cache_version.fetch_add(1, SeqCst);
+	pub fn get_pixel(&self, x: u32, y: u32) -> &AtomicU32 {
+		&self.version.fetch_add(1, SeqCst);
+		&self.pixels[(x + y * self.width.load(Relaxed)) as usize]
 	}
 
 	pub fn get_width(&self) -> u32 {
@@ -58,28 +49,28 @@ impl PixelMap {
 		(self.get_width(), self.get_height())
 	}
 
-
-	//TODO: Create a rendering queue and put the edited pixels into it and make the to img_buffer return a Result which can contain a bool or the buffer so that we may use the cached version
 	pub fn to_img_buffer(&self) -> (Vec<u8>, bool) {
-		if self.cache_version.load(Relaxed) == self.version.load(Relaxed) {
-			return (self.jpeg_cache.clone(), true);
+		if self.version.load(Relaxed) == 0 {
+			return (vec![0u8], true);
 		}
+		println!("Updating image buffer");
+		&self.version.store(0, SeqCst);
 		let mut buffer: ImageBuffer<Rgb<u8>, Vec<u8>> =
 			ImageBuffer::new(
 				self.width.load(Relaxed),
 				self.height.load(Relaxed),
 			);
 
-		for pixel in &self.pixels {
-			buffer.put_pixel(
-				pixel.x.load(Relaxed),
-				pixel.y.load(Relaxed),
-				Rgb([
-					pixel.r.load(Relaxed),
-					pixel.g.load(Relaxed),
-					pixel.b.load(Relaxed)
-				]),
-			);
+
+		let len = self.pixels.len();
+		for i in 0..len {
+			let pixel = &self.pixels[i];
+
+			let x = i as u32 % self.width.load(Relaxed);
+			let y = i as u32 / self.width.load(Relaxed);
+			let color = Color::new(pixel.load(Relaxed));
+
+			buffer.put_pixel(x, y, Rgb([color.r(), color.g(), color.b()]));
 		}
 
 		let mut jpeg_buffer = Vec::new();
@@ -100,8 +91,8 @@ impl Clone for PixelMap {
 		let mut pixels = Vec::new();
 		for x in 0..self.width.load(Relaxed) {
 			for y in 0..self.height.load(Relaxed) {
-				let pixel = self.pixels[(x * y) as usize].clone();
-				pixels.push(pixel);
+				let pixel = self.pixels[(x * y) as usize].load(Relaxed);
+				pixels.push(AtomicU32::new(pixel));
 			}
 		}
 		PixelMap {
@@ -109,8 +100,6 @@ impl Clone for PixelMap {
 			width: AtomicU32::new(self.width.load(Relaxed)),
 			height: AtomicU32::new(self.height.load(Relaxed)),
 			version: AtomicUsize::new(self.version.load(Relaxed)),
-			jpeg_cache: self.jpeg_cache.clone(),
-			cache_version: AtomicUsize::new(self.cache_version.load(Relaxed)),
 		}
 	}
 }
