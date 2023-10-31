@@ -79,9 +79,10 @@ async fn handle_connection(mut socket: tokio::net::TcpStream, pixel_map: Arc<Pix
 						}
 						let hex_color = next.unwrap();
 						let color = Color::from_hex(hex_color).unwrap();
-						let data = pixel_map.get_pixel(x, y).load(Relaxed);
-						let mut original_color = Color::new(data);
-						original_color.blend_mut(color);
+						let mut original_color = pixel_map.get_color(x, y);
+						println!("{} + {}", original_color.hex(), color.hex());
+						original_color.overlay_mut(color);
+						println!("{}", original_color.hex());
 						pixel_map.get_pixel(x, y).store(original_color.raw(), Relaxed);
 						//write_half.write(format!("PX {} {} {}\n", x, y, hex_color).as_bytes()).await.unwrap();
 						println!("PX {} {} {}", x, y, hex_color);

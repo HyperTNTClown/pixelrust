@@ -16,7 +16,7 @@ impl Color {
 
 	pub const fn from_rgba(r: u8, g: u8, b: u8, a: u8) -> Color {
 		Color {
-			value: (r as u32) << 24 | (g as u32) << 16 | (b as u32) << 8 | (a as u32)
+			value: (a as u32) | (r as u32) << 24 | (g as u32) << 16 | (b as u32) << 8
 		}
 	}
 
@@ -33,7 +33,7 @@ impl Color {
 	}
 
 	pub fn a(&self) -> u8 {
-		(self.value & 0xFF) as u8
+		((self.value) & 0xFF) as u8
 	}
 
 	pub fn from_hex(hex: &str) -> Result<Self, ParseIntError> {
@@ -47,7 +47,7 @@ impl Color {
 	}
 
 	pub fn hex(&self) -> String {
-		format!("{:06x}", self.value >> 8)
+		format!("{:08x}", self.value)
 	}
 
 	pub const fn black() -> Color {
@@ -63,11 +63,27 @@ impl Color {
 	}
 
 	pub fn blend_mut(&mut self, other: Color) {
-		let r = self.r() as u32 * (255 - other.a() as u32) + other.r() as u32 * other.a() as u32;
-		let g = self.g() as u32 * (255 - other.a() as u32) + other.g() as u32 * other.a() as u32;
-		let b = self.b() as u32 * (255 - other.a() as u32) + other.b() as u32 * other.a() as u32;
-		let a = self.a() as u32 * (255 - other.a() as u32) + other.a() as u32 * other.a() as u32;
-		self.value = (r << 24) | (g << 16) | (b << 8) | a;
+		let a1 = self.a() as f32 / 255.0;
+		let a2 = other.a() as f32 / 255.0;
+
+		let r = (((self.r() as f32 * a1) + (other.r() as f32 * a2))/2.0) as u32;
+		let g = (((self.g() as f32 * a1) + (other.g() as f32 * a2))/2.0) as u32;
+		let b = (((self.b() as f32 * a1) + (other.b() as f32 * a2))/2.0) as u32;
+		let a = (((self.a() as f32 * a1) + (other.a() as f32 * a2))/2.0) as u32;
+
+		self.value = (a << 24) | (r << 16) | (g << 8) | b;
+	}
+
+	pub fn overlay_mut(&mut self, other: Color) {
+		let factor = other.a() as f32 / 255.0;
+
+		let inv_factor = 1.0 - factor;
+
+		let r = (self.r() as f32 * inv_factor + other.r() as f32 * factor) as u8;
+		let g = (self.g() as f32 * inv_factor + other.g() as f32 * factor) as u8;
+		let b = (self.b() as f32 * inv_factor + other.b() as f32 * factor) as u8;
+
+		self.value = (self.a() as u32) | (r as u32) << 24 | (g as u32) << 16 | (b as u32) << 8;
 	}
 }
 
