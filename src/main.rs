@@ -55,12 +55,10 @@ async fn handle_connection(mut socket: tokio::net::TcpStream, pixel_map: Arc<Pix
 				let message = message.trim();
 				let mut split = message.split(" ");
 				let command = split.next().unwrap();
-				println!("Message: {}, Command: {}", message, command);
 				match command {
 					"PX" => {
 						let x = split.next().unwrap().parse::<u32>().unwrap();
 						let y = split.next().unwrap().parse::<u32>().unwrap();
-						println!("X: {}, Y: {}", x, y);
 						match (x,y) {
 							coords
 							if coords.0 == WIDTH || coords.1 == HEIGHT => {
@@ -80,13 +78,12 @@ async fn handle_connection(mut socket: tokio::net::TcpStream, pixel_map: Arc<Pix
 							continue;
 						}
 						let hex_color = next.unwrap();
-						let r = u8::from_str_radix(&hex_color[0..2], 16).unwrap();
-						let g = u8::from_str_radix(&hex_color[2..4], 16).unwrap();
-						let b = u8::from_str_radix(&hex_color[4..6], 16).unwrap();
-						println!("R: {}, G: {}, B: {}", r, g, b);
-
-						pixel_map.get_pixel(x, y).store(Color::from_rgb(r, g, b).raw(), Relaxed);
-						write_half.write(format!("PX {} {} {}\n", x, y, hex_color).as_bytes()).await.unwrap();
+						let color = Color::from_hex(hex_color).unwrap();
+						let data = pixel_map.get_pixel(x, y).load(Relaxed);
+						let mut original_color = Color::new(data);
+						original_color.blend_mut(color);
+						pixel_map.get_pixel(x, y).store(original_color.raw(), Relaxed);
+						//write_half.write(format!("PX {} {} {}\n", x, y, hex_color).as_bytes()).await.unwrap();
 						println!("PX {} {} {}", x, y, hex_color);
 					},
 					"SIZE" => {
@@ -105,5 +102,6 @@ async fn handle_connection(mut socket: tokio::net::TcpStream, pixel_map: Arc<Pix
 			},
 			Err(e) => {println!("Error: {}", e); break;}
 		}
+		write_half.flush().await.unwrap();
 	}
 }

@@ -61,6 +61,14 @@ impl Color {
 	pub const fn raw(&self) -> u32 {
 		self.value
 	}
+
+	pub fn blend_mut(&mut self, other: Color) {
+		let r = self.r() as u32 * (255 - other.a() as u32) + other.r() as u32 * other.a() as u32;
+		let g = self.g() as u32 * (255 - other.a() as u32) + other.g() as u32 * other.a() as u32;
+		let b = self.b() as u32 * (255 - other.a() as u32) + other.b() as u32 * other.a() as u32;
+		let a = self.a() as u32 * (255 - other.a() as u32) + other.a() as u32 * other.a() as u32;
+		self.value = (r << 24) | (g << 16) | (b << 8) | a;
+	}
 }
 
 impl Display for Color {
