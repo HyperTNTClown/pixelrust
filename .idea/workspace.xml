@@ -7,13 +7,11 @@
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cf8aacae-9b81-4c86-a622-7634722ef1d5" name="Changes" comment="Initialize new Rust project with additional checks&#10;&#10;Established a new Rust project and added a .gitignore, Cargo.lock and Cargo.toml files. The .gitignore excludes unnecessary files from git, the Cargo.toml contains the project description and dependencies like Tokio and mjpeg_rs. Additional checks were added in the main.rs to ensure x and y are within the bounds of WIDTH and HEIGHT. Corrections were implemented to the get_pixel and set_pixel functions in pixel_map.rs. This ensures that multiple builds of the same package will resolve and build identical copies of dependencies.">
-      <change afterPath="$PROJECT_DIR$/src/color.rs" afterDir="false" />
+    <list default="true" id="cf8aacae-9b81-4c86-a622-7634722ef1d5" name="Changes" comment="Don't actually know what I'm doing but it might work?">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cargo.lock" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pixel.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pixel_map.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/pixel_map.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/render_thread.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/render_thread.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -134,7 +132,7 @@
       <workItem from="1698301159143" duration="8155000" />
       <workItem from="1698384090913" duration="8646000" />
       <workItem from="1698421752501" duration="17145000" />
-      <workItem from="1698559527610" duration="22997000" />
+      <workItem from="1698559527610" duration="24382000" />
     </task>
     <task id="LOCAL-00001" summary="Add .gitignore, Cargo.lock and Cargo.toml for new Rust project&#10;&#10;Added .gitignore file to exclude unnecessary files from git. Initialised new Rust project with Cargo.toml. This contains project description and dependencies such as Tokio, mjpeg_rs, etc. Also, added Cargo.lock which ensures that multiple builds of the same package will resolve and build identical copies of dependencies.">
       <option name="closed" value="true" />
@@ -152,7 +150,15 @@
       <option name="project" value="LOCAL" />
       <updated>1698654706381</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Don't actually know what I'm doing but it might work?">
+      <option name="closed" value="true" />
+      <created>1698727726021</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1698727726021</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -172,6 +178,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Add .gitignore, Cargo.lock and Cargo.toml for new Rust project&#10;&#10;Added .gitignore file to exclude unnecessary files from git. Initialised new Rust project with Cargo.toml. This contains project description and dependencies such as Tokio, mjpeg_rs, etc. Also, added Cargo.lock which ensures that multiple builds of the same package will resolve and build identical copies of dependencies." />
     <MESSAGE value="Initialize new Rust project with additional checks&#10;&#10;Established a new Rust project and added a .gitignore, Cargo.lock and Cargo.toml files. The .gitignore excludes unnecessary files from git, the Cargo.toml contains the project description and dependencies like Tokio and mjpeg_rs. Additional checks were added in the main.rs to ensure x and y are within the bounds of WIDTH and HEIGHT. Corrections were implemented to the get_pixel and set_pixel functions in pixel_map.rs. This ensures that multiple builds of the same package will resolve and build identical copies of dependencies." />
-    <option name="LAST_COMMIT_MESSAGE" value="Initialize new Rust project with additional checks&#10;&#10;Established a new Rust project and added a .gitignore, Cargo.lock and Cargo.toml files. The .gitignore excludes unnecessary files from git, the Cargo.toml contains the project description and dependencies like Tokio and mjpeg_rs. Additional checks were added in the main.rs to ensure x and y are within the bounds of WIDTH and HEIGHT. Corrections were implemented to the get_pixel and set_pixel functions in pixel_map.rs. This ensures that multiple builds of the same package will resolve and build identical copies of dependencies." />
+    <MESSAGE value="Don't actually know what I'm doing but it might work?" />
+    <option name="LAST_COMMIT_MESSAGE" value="Don't actually know what I'm doing but it might work?" />
   </component>
 </project>

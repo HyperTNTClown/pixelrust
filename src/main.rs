@@ -1,9 +1,9 @@
-use std::io::{BufRead, BufReader, Write};
+use std::io::{Read, Write};
 use std::net::{TcpListener};
 use tokio::net::TcpStream;
 use std::sync::Arc;
 use std::sync::atomic::Ordering::Relaxed;
-use tokio::io::{AsyncRead, AsyncWrite, Interest, ReadBuf};
+use tokio::io::{AsyncBufReadExt, AsyncRead, AsyncWrite, AsyncWriteExt, BufReader};
 use crate::color::Color;
 use crate::pixel_map::PixelMap;
 
@@ -30,6 +30,7 @@ fn main() {
 			let (socket, _) = tcp_listener.accept().unwrap();
 			let pixel_map = Arc::clone(&pixel_map);
 			tokio::spawn(async {
+				let socket = TcpStream::from_std(socket).unwrap();
 				handle_connection(socket, pixel_map).await;
 			});
 		}
@@ -38,65 +39,71 @@ fn main() {
 	render_thread::render_thread(pix_clone);
 }
 
-async fn handle_connection(mut socket: std::net::TcpStream, pixel_map: Arc<PixelMap>) {
+async fn handle_connection(mut socket: tokio::net::TcpStream, pixel_map: Arc<PixelMap>)
+{
+	let (read_half, mut write_half) = socket.split();
 	let mut message = String::new();
-	socket.set_nonblocking(true).unwrap();
-	socket.set_nodelay(true).unwrap();
-	let mut reader = BufReader::new(socket.try_clone().unwrap());
-	println!("Connection from {}", socket.peer_addr().unwrap());
+	let mut reader = BufReader::new(read_half);
+	//println!("Connection from {}", socket.peer_addr().unwrap());
 	loop {
 		let pixel_map = pixel_map.clone();
 		message.clear();
-		let bytes_read = reader.read_line(&mut message);
-		let message = message.trim();
-		let mut split = message.split(" ");
-		let command = split.next().unwrap();
-		println!("Message: {}, Command: {}", message, command);
-		match command {
-			"PX" => {
-				let x = split.next().unwrap().parse::<u32>().unwrap();
-				let y = split.next().unwrap().parse::<u32>().unwrap();
-				println!("X: {}, Y: {}", x, y);
-				match (x,y) {
-					coords
-					if coords.0 == WIDTH || coords.1 == HEIGHT => {
-						socket.write("ERR: 0 based index...\n".as_bytes()).unwrap();
-						continue;
-					}
-					coords
-					if coords.0 > WIDTH || coords.1 > HEIGHT => {
-						socket.write("ERR: Out of Bounds (Tip: SIZE)\n".as_bytes()).unwrap();
-						continue;
-					}
-					_ => {}
-				};
-				let next = split.next();
-				if next.is_none() {
-					socket.write(format!("PX {} {} {}\n", x, y, pixel_map.get_color(x, y)).as_bytes()).unwrap();
-					continue;
-				}
-				let hex_color = next.unwrap();
-				let r = u8::from_str_radix(&hex_color[0..2], 16).unwrap();
-				let g = u8::from_str_radix(&hex_color[2..4], 16).unwrap();
-				let b = u8::from_str_radix(&hex_color[4..6], 16).unwrap();
-				println!("R: {}, G: {}, B: {}", r, g, b);
+		match reader.read_line(&mut message)
+			.await {
+			Ok(0) => break,
+			Ok(_) => {
+				let message = message.trim();
+				let mut split = message.split(" ");
+				let command = split.next().unwrap();
+				println!("Message: {}, Command: {}", message, command);
+				match command {
+					"PX" => {
+						let x = split.next().unwrap().parse::<u32>().unwrap();
+						let y = split.next().unwrap().parse::<u32>().unwrap();
+						println!("X: {}, Y: {}", x, y);
+						match (x,y) {
+							coords
+							if coords.0 == WIDTH || coords.1 == HEIGHT => {
+								write_half.write("ERR: 0 based index...\n".as_bytes()).await.unwrap();
+								continue;
+							}
+							coords
+							if coords.0 > WIDTH || coords.1 > HEIGHT => {
+								write_half.write("ERR: Out of Bounds (Tip: SIZE)\n".as_bytes()).await.unwrap();
+								continue;
+							}
+							_ => {}
+						};
+						let next = split.next();
+						if next.is_none() {
+							write_half.write(format!("PX {} {} {}\n", x, y, pixel_map.get_color(x, y)).as_bytes()).await.unwrap();
+							continue;
+						}
+						let hex_color = next.unwrap();
+						let r = u8::from_str_radix(&hex_color[0..2], 16).unwrap();
+						let g = u8::from_str_radix(&hex_color[2..4], 16).unwrap();
+						let b = u8::from_str_radix(&hex_color[4..6], 16).unwrap();
+						println!("R: {}, G: {}, B: {}", r, g, b);
 
-				pixel_map.get_pixel(x, y).store(Color::from_rgb(r, g, b).raw(), Relaxed);
-				socket.write(format!("PX {} {} {}\n", x, y, hex_color).as_bytes()).unwrap();
-				println!("PX {} {} {}", x, y, hex_color);
+						pixel_map.get_pixel(x, y).store(Color::from_rgb(r, g, b).raw(), Relaxed);
+						write_half.write(format!("PX {} {} {}\n", x, y, hex_color).as_bytes()).await.unwrap();
+						println!("PX {} {} {}", x, y, hex_color);
+					},
+					"SIZE" => {
+						let size = pixel_map.get_size();
+						write_half.write(format!("SIZE {} {}\n", size.0, size.1).as_bytes()).await.unwrap();
+					},
+					"EXIT" => {
+						// exit program
+						write_half.write("EXITING\n".as_bytes()).await.unwrap();
+						std::process::exit(0);
+					}
+					_ => {
+						write_half.write("ERR: Unknown Command\n".as_bytes()).await.unwrap();
+					}
+				}
 			},
-			"SIZE" => {
-				let size = pixel_map.get_size();
-				socket.write(format!("SIZE {} {}\n", size.0, size.1).as_bytes()).unwrap();
-			},
-			"EXIT" => {
-				// exit program
-				socket.write("EXITING\n".as_bytes()).unwrap();
-				std::process::exit(0);
-			}
-			_ => {
-				socket.write("ERR: Unknown Command\n".as_bytes()).unwrap();
-			}
+			Err(e) => {println!("Error: {}", e); break;}
 		}
 	}
 }
