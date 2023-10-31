@@ -1,7 +1,7 @@
 use std::sync::atomic::{AtomicU32, AtomicUsize};
 use std::sync::atomic::Ordering::{Relaxed, SeqCst};
 use image::codecs::jpeg::JpegEncoder;
-use image::{ColorType, ImageBuffer, Pixel, Rgb};
+use image::{ImageBuffer, Rgb};
 use crate::color::Color;
 
 pub(crate) struct PixelMap {
@@ -15,8 +15,8 @@ pub(crate) struct PixelMap {
 impl PixelMap {
 	pub fn new(width: u32, height: u32) -> PixelMap {
 		let mut pixels = Vec::new();
-		for x in 0..width {
-			for y in 0..height {
+		for _ in 0..width {
+			for _ in 0..height {
 				pixels.push(AtomicU32::new(Color::black().raw()));
 			}
 		}
@@ -33,7 +33,7 @@ impl PixelMap {
 	}
 
 	pub fn get_pixel(&self, x: u32, y: u32) -> &AtomicU32 {
-		&self.version.fetch_add(1, SeqCst);
+		self.version.fetch_add(1, SeqCst);
 		&self.pixels[(x + y * self.width.load(Relaxed)) as usize]
 	}
 
@@ -54,7 +54,7 @@ impl PixelMap {
 			return (vec![0u8], true);
 		}
 		println!("Updating image buffer");
-		&self.version.store(0, SeqCst);
+		self.version.store(0, SeqCst);
 		let mut buffer: ImageBuffer<Rgb<u8>, Vec<u8>> =
 			ImageBuffer::new(
 				self.width.load(Relaxed),
@@ -74,7 +74,7 @@ impl PixelMap {
 		}
 
 		let mut jpeg_buffer = Vec::new();
-		let mut encoder = JpegEncoder::new_with_quality(&mut jpeg_buffer, 60);
+		let mut encoder = JpegEncoder::new_with_quality(&mut jpeg_buffer, 100);
 		encoder.encode(
 			&buffer.into_raw(),
 			self.width.load(Relaxed),

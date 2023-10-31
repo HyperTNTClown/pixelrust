@@ -1,9 +1,8 @@
-use std::io::{Read, Write};
 use std::net::{TcpListener};
 use tokio::net::TcpStream;
 use std::sync::Arc;
 use std::sync::atomic::Ordering::Relaxed;
-use tokio::io::{AsyncBufReadExt, AsyncRead, AsyncWrite, AsyncWriteExt, BufReader};
+use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use crate::color::Color;
 use crate::pixel_map::PixelMap;
 
@@ -39,8 +38,9 @@ fn main() {
 	render_thread::render_thread(pix_clone);
 }
 
-async fn handle_connection(mut socket: tokio::net::TcpStream, pixel_map: Arc<PixelMap>)
+async fn handle_connection(mut socket: TcpStream, pixel_map: Arc<PixelMap>)
 {
+	let mut debug = false;
 	let (read_half, mut write_half) = socket.split();
 	let mut message = String::new();
 	let mut reader = BufReader::new(read_half);
@@ -57,8 +57,20 @@ async fn handle_connection(mut socket: tokio::net::TcpStream, pixel_map: Arc<Pix
 				let command = split.next().unwrap();
 				match command {
 					"PX" => {
-						let x = split.next().unwrap().parse::<u32>().unwrap();
-						let y = split.next().unwrap().parse::<u32>().unwrap();
+						let x: u32 = match split.next() {
+							Some(x) => x.parse::<u32>().unwrap(),
+							None => {
+								write_half.write("ERR: Missing X\n".as_bytes()).await.unwrap();
+								continue;
+							}
+						};
+						let y: u32 = match split.next() {
+							Some(y) => y.parse::<u32>().unwrap(),
+							None => {
+								write_half.write("ERR: Missing Y\n".as_bytes()).await.unwrap();
+								continue;
+							}
+						};
 						match (x,y) {
 							coords
 							if coords.0 == WIDTH || coords.1 == HEIGHT => {
@@ -80,11 +92,11 @@ async fn handle_connection(mut socket: tokio::net::TcpStream, pixel_map: Arc<Pix
 						let hex_color = next.unwrap();
 						let color = Color::from_hex(hex_color).unwrap();
 						let mut original_color = pixel_map.get_color(x, y);
-						println!("{} + {}", original_color.hex(), color.hex());
 						original_color.overlay_mut(color);
-						println!("{}", original_color.hex());
 						pixel_map.get_pixel(x, y).store(original_color.raw(), Relaxed);
-						//write_half.write(format!("PX {} {} {}\n", x, y, hex_color).as_bytes()).await.unwrap();
+						if debug {
+							write_half.write(format!("PX {} {} {}\n", x, y, hex_color).as_bytes()).await.unwrap_or(0);
+						}
 						println!("PX {} {} {}", x, y, hex_color);
 					},
 					"SIZE" => {
@@ -95,7 +107,13 @@ async fn handle_connection(mut socket: tokio::net::TcpStream, pixel_map: Arc<Pix
 						// exit program
 						write_half.write("EXITING\n".as_bytes()).await.unwrap();
 						std::process::exit(0);
-					}
+					},
+					"DEBUG" => {
+						debug = !debug;
+					},
+					"HELP" => {
+						write_half.write("Commands:\nPX x y [hex]\nSIZE\nEXIT\nDEBUG\nHELP\n".as_bytes()).await.unwrap();
+					},
 					_ => {
 						write_half.write("ERR: Unknown Command\n".as_bytes()).await.unwrap();
 					}

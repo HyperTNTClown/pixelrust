@@ -54,24 +54,9 @@ impl Color {
 		Color::from_rgb(0, 0, 0)
 	}
 
-	pub const fn white() -> Color {
-		Color::from_rgb(255, 255, 255)
-	}
 
 	pub const fn raw(&self) -> u32 {
 		self.value
-	}
-
-	pub fn blend_mut(&mut self, other: Color) {
-		let a1 = self.a() as f32 / 255.0;
-		let a2 = other.a() as f32 / 255.0;
-
-		let r = (((self.r() as f32 * a1) + (other.r() as f32 * a2))/2.0) as u32;
-		let g = (((self.g() as f32 * a1) + (other.g() as f32 * a2))/2.0) as u32;
-		let b = (((self.b() as f32 * a1) + (other.b() as f32 * a2))/2.0) as u32;
-		let a = (((self.a() as f32 * a1) + (other.a() as f32 * a2))/2.0) as u32;
-
-		self.value = (a << 24) | (r << 16) | (g << 8) | b;
 	}
 
 	pub fn overlay_mut(&mut self, other: Color) {

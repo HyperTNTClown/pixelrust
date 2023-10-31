@@ -1,6 +1,5 @@
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
 use std::thread;
-use std::thread::sleep;
 use crate::pixel_map::PixelMap;
 use mjpeg_rs::MJpeg;
 
@@ -11,8 +10,8 @@ pub(crate) fn render_thread(pixel_map: Arc<PixelMap>) {
 
 	let pixel_map = Arc::clone(&pixel_map);
 
-	std::thread::spawn(move || {
-		let mut cache = vec![0u8];
+	thread::spawn(move || {
+		let mut cache: Vec<u8>;
 		let (buf, _) = pixel_map.to_img_buffer();
 		m.update_jpeg(buf.clone()).unwrap();
 		cache = buf.clone();
