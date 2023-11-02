@@ -7,8 +7,9 @@
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cf8aacae-9b81-4c86-a622-7634722ef1d5" name="Changes" comment="We ASYNC">
+    <list default="true" id="cf8aacae-9b81-4c86-a622-7634722ef1d5" name="Changes" comment="I see it workin' I hatin'">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/color.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/color.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -30,7 +31,7 @@
     <option name="directoryName" value="hh7cl1y9" />
   </component>
   <component name="ProblemsViewState">
-    <option name="selectedTabId" value="CurrentFile" />
+    <option name="selectedTabId" value="ProjectErrors" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
@@ -131,6 +132,9 @@
       <workItem from="1698384090913" duration="8646000" />
       <workItem from="1698421752501" duration="17145000" />
       <workItem from="1698559527610" duration="26937000" />
+      <workItem from="1698733026268" duration="11022000" />
+      <workItem from="1698883304904" duration="790000" />
+      <workItem from="1698888509272" duration="1627000" />
     </task>
     <task id="LOCAL-00001" summary="Add .gitignore, Cargo.lock and Cargo.toml for new Rust project&#10;&#10;Added .gitignore file to exclude unnecessary files from git. Initialised new Rust project with Cargo.toml. This contains project description and dependencies such as Tokio, mjpeg_rs, etc. Also, added Cargo.lock which ensures that multiple builds of the same package will resolve and build identical copies of dependencies.">
       <option name="closed" value="true" />
@@ -164,7 +168,31 @@
       <option name="project" value="LOCAL" />
       <updated>1698729060871</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="WE TRANSPARENT">
+      <option name="closed" value="true" />
+      <created>1698734930104</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1698734930104</updated>
+    </task>
+    <task id="LOCAL-00006" summary="WE NOW REALLY TRANSPARENT">
+      <option name="closed" value="true" />
+      <created>1698774477482</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1698774477482</updated>
+    </task>
+    <task id="LOCAL-00007" summary="I see it workin' I hatin'">
+      <option name="closed" value="true" />
+      <created>1698776412082</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1698776412082</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -186,6 +214,9 @@
     <MESSAGE value="Initialize new Rust project with additional checks&#10;&#10;Established a new Rust project and added a .gitignore, Cargo.lock and Cargo.toml files. The .gitignore excludes unnecessary files from git, the Cargo.toml contains the project description and dependencies like Tokio and mjpeg_rs. Additional checks were added in the main.rs to ensure x and y are within the bounds of WIDTH and HEIGHT. Corrections were implemented to the get_pixel and set_pixel functions in pixel_map.rs. This ensures that multiple builds of the same package will resolve and build identical copies of dependencies." />
     <MESSAGE value="Don't actually know what I'm doing but it might work?" />
     <MESSAGE value="We ASYNC" />
-    <option name="LAST_COMMIT_MESSAGE" value="We ASYNC" />
+    <MESSAGE value="WE TRANSPARENT" />
+    <MESSAGE value="WE NOW REALLY TRANSPARENT" />
+    <MESSAGE value="I see it workin' I hatin'" />
+    <option name="LAST_COMMIT_MESSAGE" value="I see it workin' I hatin'" />
   </component>
 </project>

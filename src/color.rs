@@ -70,6 +70,10 @@ impl Color {
 
 		self.value = (self.a() as u32) | (r as u32) << 24 | (g as u32) << 16 | (b as u32) << 8;
 	}
+
+	pub fn equals(&self, other: Color) -> bool {
+		self.value == other.value
+	}
 }
 
 impl Display for Color {

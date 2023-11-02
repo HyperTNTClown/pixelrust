@@ -93,10 +93,13 @@ async fn handle_connection(mut socket: TcpStream, pixel_map: Arc<PixelMap>)
 						let color = Color::from_hex(hex_color).unwrap();
 						let mut original_color = pixel_map.get_color(x, y);
 						original_color.overlay_mut(color);
-						pixel_map.get_pixel(x, y).store(original_color.raw(), Relaxed);
 						if debug {
 							write_half.write(format!("PX {} {} {}\n", x, y, hex_color).as_bytes()).await.unwrap_or(0);
 						}
+						if original_color.equals(pixel_map.get_color(x,y)) {
+							continue;
+						}
+						pixel_map.get_pixel(x, y).store(original_color.raw(), Relaxed);
 						println!("PX {} {} {}", x, y, hex_color);
 					},
 					"SIZE" => {
@@ -106,7 +109,8 @@ async fn handle_connection(mut socket: TcpStream, pixel_map: Arc<PixelMap>)
 					"EXIT" => {
 						// exit program
 						write_half.write("EXITING\n".as_bytes()).await.unwrap();
-						std::process::exit(0);
+						write_half.flush().await.unwrap();
+						return;
 					},
 					"DEBUG" => {
 						debug = !debug;
