@@ -19,7 +19,8 @@ fn main() {
 		.build()
 		.unwrap();
 
-	let pixel_map = Arc::new(PixelMap::new(WIDTH, HEIGHT));
+	//let pixel_map = Arc::new(PixelMap::new(WIDTH, HEIGHT));
+	let pixel_map = Arc::new(PixelMap::load_image("image.qoi"));
 
 	let pix_clone = Arc::clone(&pixel_map);
 
@@ -95,12 +96,12 @@ async fn handle_connection(mut socket: TcpStream, pixel_map: Arc<PixelMap>)
 						original_color.overlay_mut(color);
 						if debug {
 							write_half.write(format!("PX {} {} {}\n", x, y, hex_color).as_bytes()).await.unwrap_or(0);
+							println!("PX {} {} {}", x, y, hex_color);
 						}
 						if original_color.equals(pixel_map.get_color(x,y)) {
 							continue;
 						}
 						pixel_map.get_pixel(x, y).store(original_color.raw(), Relaxed);
-						println!("PX {} {} {}", x, y, hex_color);
 					},
 					"SIZE" => {
 						let size = pixel_map.get_size();
@@ -117,7 +118,7 @@ async fn handle_connection(mut socket: TcpStream, pixel_map: Arc<PixelMap>)
 					},
 					"HELP" => {
 						write_half.write("Commands:\nPX x y [hex]\nSIZE\nEXIT\nDEBUG\nHELP\n".as_bytes()).await.unwrap();
-					},
+					}
 					_ => {
 						write_half.write("ERR: Unknown Command\n".as_bytes()).await.unwrap();
 					}

@@ -1,7 +1,9 @@
+use std::ops::Deref;
 use std::sync::atomic::{AtomicU32, AtomicUsize};
 use std::sync::atomic::Ordering::{Relaxed, SeqCst};
+use std::thread;
 use image::codecs::jpeg::JpegEncoder;
-use image::{ImageBuffer, Rgb};
+use image::{GenericImageView, ImageBuffer, Rgb};
 use crate::color::Color;
 
 pub(crate) struct PixelMap {
@@ -18,6 +20,29 @@ impl PixelMap {
 		for _ in 0..width {
 			for _ in 0..height {
 				pixels.push(AtomicU32::new(Color::black().raw()));
+			}
+		}
+		PixelMap {
+			pixels,
+			width: AtomicU32::new(width),
+			height: AtomicU32::new(height),
+			version: AtomicUsize::new(1),
+		}
+	}
+
+	pub fn load_image(filename: &str) -> PixelMap {
+		let img = image::open(filename);
+		if img.is_err() {
+			return PixelMap::new(1280, 720);
+		}
+		let img = img.unwrap();
+		let (width, height) = img.dimensions();
+		let mut pixels = Vec::new();
+		for y in 0..height {
+			for x in 0..width {
+				let pixel = img.get_pixel(x, y);
+				let color = Color::from_rgb(pixel[0], pixel[1], pixel[2]);
+				pixels.push(AtomicU32::new(color.raw()));
 			}
 		}
 		PixelMap {
@@ -75,12 +100,17 @@ impl PixelMap {
 
 		let mut jpeg_buffer = Vec::new();
 		let mut encoder = JpegEncoder::new_with_quality(&mut jpeg_buffer, 100);
+		let raw_buffer = &buffer.as_raw();
 		encoder.encode(
-			&buffer.into_raw(),
+			&raw_buffer,
 			self.width.load(Relaxed),
 			self.height.load(Relaxed),
 			image::ColorType::Rgb8)
 			.unwrap();
+
+		thread::spawn(move || {
+			buffer.clone().save("image.qoi").unwrap()
+		});
 
 		(jpeg_buffer, false)
 	}
