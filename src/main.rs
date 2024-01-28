@@ -19,7 +19,6 @@ fn main() {
 		.build()
 		.unwrap();
 
-	//let pixel_map = Arc::new(PixelMap::new(WIDTH, HEIGHT));
 	let pixel_map = Arc::new(PixelMap::load_image("image.qoi"));
 
 	let pix_clone = Arc::clone(&pixel_map);
