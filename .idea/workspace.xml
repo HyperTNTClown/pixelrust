@@ -5,17 +5,24 @@
   </component>
   <component name="CargoProjects">
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
+    <cargoProject FILE="$PROJECT_DIR$/app/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cf8aacae-9b81-4c86-a622-7634722ef1d5" name="Changes" comment="Saving to qoi?">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="cf8aacae-9b81-4c86-a622-7634722ef1d5" name="Changes" comment="Uhhm some stuff?">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/app/Cargo.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/webpack.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/webpack.config.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CodyActiveAccount">
+    <option name="activeAccountId" value="VXNlcjo1MTU2MQ==" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -25,6 +32,11 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="MacroExpansionManager">
@@ -44,25 +56,75 @@
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
+    &quot;Cargo.Run on OC.executor&quot;: &quot;Run&quot;,
+    &quot;Cargo.Run pixelrust Release.executor&quot;: &quot;Run&quot;,
+    &quot;Cargo.Run pixelrust.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.CodyProjectSettingsMigration&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;web&quot;,
     &quot;last_opened_file_path&quot;: &quot;/Users/marvin/Projects/pixelrust&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;npm.start.executor&quot;: &quot;Run&quot;,
     &quot;org.rust.cargo.project.model.PROJECT_DISCOVERY&quot;: &quot;true&quot;,
     &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;language.rust.rustfmt&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/Users/marvin/Applications/RustRover.app/Contents/plugins/javascript-impl/jsLanguageServicesImpl/external&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/app" />
+    </key>
+  </component>
+  <component name="RsExternalLinterProjectSettings">
+    <option name="tool" value="Clippy" />
+  </component>
   <component name="RunManager" selected="Cargo.Run pixelrust">
     <configuration name="Flamegraph pixelrust" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="command" value="flamegraph" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <envs />
+      <option name="emulateTerminal" value="true" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Run on OC" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+      <target name="root@oc:22" />
+      <option name="command" value="run --release" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <envs />
+      <option name="emulateTerminal" value="true" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Run pixelrust Release" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+      <option name="command" value="run --package pixelrust --bin pixelrust --release" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
       <envs />
       <option name="emulateTerminal" value="true" />
@@ -112,14 +174,30 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
+    <configuration name="start" type="js.build_tools.npm" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/app/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="start" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
     <list>
       <item itemvalue="Cargo.Flamegraph pixelrust" />
+      <item itemvalue="Cargo.Run on OC" />
+      <item itemvalue="Cargo.Run pixelrust Release" />
       <item itemvalue="Cargo.Run pixelrust" />
       <item itemvalue="Cargo.Test pixelrust" />
+      <item itemvalue="npm.start" />
     </list>
   </component>
   <component name="RustProjectSettings">
     <option name="toolchainHomeDirectory" value="$USER_HOME$/.cargo/bin" />
+  </component>
+  <component name="RustfmtProjectSettings">
+    <option name="runRustfmtOnSave" value="true" />
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -142,6 +220,17 @@
       <workItem from="1700259190494" duration="176000" />
       <workItem from="1701407855517" duration="92000" />
       <workItem from="1701407971235" duration="59000" />
+      <workItem from="1706419803700" duration="4156000" />
+      <workItem from="1706510264276" duration="1953000" />
+      <workItem from="1706585077086" duration="2402000" />
+      <workItem from="1706748688003" duration="599000" />
+      <workItem from="1706771984748" duration="509000" />
+      <workItem from="1706777093558" duration="4273000" />
+      <workItem from="1706814010364" duration="34356000" />
+      <workItem from="1706946042367" duration="10247000" />
+      <workItem from="1707155046388" duration="132000" />
+      <workItem from="1707155186617" duration="132000" />
+      <workItem from="1707155418013" duration="8484000" />
     </task>
     <task id="LOCAL-00001" summary="Add .gitignore, Cargo.lock and Cargo.toml for new Rust project&#10;&#10;Added .gitignore file to exclude unnecessary files from git. Initialised new Rust project with Cargo.toml. This contains project description and dependencies such as Tokio, mjpeg_rs, etc. Also, added Cargo.lock which ensures that multiple builds of the same package will resolve and build identical copies of dependencies.">
       <option name="closed" value="true" />
@@ -215,7 +304,39 @@
       <option name="project" value="LOCAL" />
       <updated>1698942174244</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="Probably not important">
+      <option name="closed" value="true" />
+      <created>1706420477050</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1706420477050</updated>
+    </task>
+    <task id="LOCAL-00011" summary="Thought I should maybe make a commit">
+      <option name="closed" value="true" />
+      <created>1706952556689</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1706952556689</updated>
+    </task>
+    <task id="LOCAL-00012" summary="Locks and Caddyfile">
+      <option name="closed" value="true" />
+      <created>1706952610821</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1706952610821</updated>
+    </task>
+    <task id="LOCAL-00013" summary="Uhhm some stuff?">
+      <option name="closed" value="true" />
+      <created>1707199802581</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1707199802581</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -226,7 +347,19 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="master" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
           </value>
         </entry>
       </map>
@@ -242,6 +375,10 @@
     <MESSAGE value="I see it workin' I hatin'" />
     <MESSAGE value="Maybeeee we should not exit fully?" />
     <MESSAGE value="Saving to qoi?" />
-    <option name="LAST_COMMIT_MESSAGE" value="Saving to qoi?" />
+    <MESSAGE value="Probably not important" />
+    <MESSAGE value="Thought I should maybe make a commit" />
+    <MESSAGE value="Locks and Caddyfile" />
+    <MESSAGE value="Uhhm some stuff?" />
+    <option name="LAST_COMMIT_MESSAGE" value="Uhhm some stuff?" />
   </component>
 </project>

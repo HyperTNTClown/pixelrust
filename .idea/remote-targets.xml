@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="RemoteTargetsManager">
+    <targets>
+      <target name="root@oc:22" type="ssh/sftp" uuid="5c52f151-fe0d-46b3-8011-6f89a3b7a685">
+        <config>
+          <option name="projectRootOnTarget" value="/root/pixelrust" />
+          <option name="serverName" value="root@oc:22 agent" />
+          <option name="useRsync" value="true" />
+        </config>
+      </target>
+    </targets>
+  </component>
+</project>

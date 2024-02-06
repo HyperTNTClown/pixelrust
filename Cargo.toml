@@ -2,11 +2,28 @@
 name = "pixelrust"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tokio = { version = "1.33.0", features = ["rt", "rt-multi-thread", "macros", "net", "io-util", "full"] }
-mjpeg_rs = "*"
-image = "0.24.7"
-rayon = "1.8.0"
+tokio = { version = "1.35.1", features = ["rt", "rt-multi-thread", "macros", "net", "io-util", "full"] }
+rapid-qoi = "0.6.1"
+rayon = "1.8.1"
+crossbeam-channel = "0.5.11"
+brotli = "3.4.0"
+deflate = { version = "1.0.0", features = ["gzip"] }
+fdeflate = "0.3.4"
+base64 = "0.21.7"
+fastwebsockets = { version = "0.6.0", features = ["upgrade"] }
+sha1 = "0.11.0-pre.3"
+
+[profile.release]
+lto = true
+opt-level = 3
+codegen-units = 1
+
+# [profile.dev]
+# lto = true
+# incremental = true
+# opt-level = 1
