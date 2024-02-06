@@ -215,7 +215,7 @@ async fn handle_connection(mut socket: TcpStream, mut pixel_map: Arc<PixelMap>) 
                     }
                     "HELP" => {
                         write_half
-                            .write("Commands:\nPX x y [hex]\nSIZE\nEXIT\nDEBUG\nBIN (changes channel mode: [x:u16][y:u16][abgr:u32] LE)\nHELP\n".as_bytes())
+                            .write("Commands:\nPX x y [hex]\nSIZE\nEXIT\nDEBUG\nBIN (changes channel mode: [x:u16][y:u16][rgba:u32] LE)\nHELP\n".as_bytes())
                             .await
                             .unwrap();
                     }
