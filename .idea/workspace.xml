@@ -8,18 +8,13 @@
     <cargoProject FILE="$PROJECT_DIR$/app/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cf8aacae-9b81-4c86-a622-7634722ef1d5" name="Changes" comment="Locks and Caddyfile">
-      <change afterPath="$PROJECT_DIR$/.idea/sshConfigs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+    <list default="true" id="cf8aacae-9b81-4c86-a622-7634722ef1d5" name="Changes" comment="Uhhm some stuff?">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Cargo.lock" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Cargo.lock" beforeDir="false" afterPath="$PROJECT_DIR$/app/Cargo.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/app/Cargo.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/lib.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pixel_map.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/pixel_map.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/render_thread.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/render_thread.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/app/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/webpack.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/webpack.config.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -235,7 +230,7 @@
       <workItem from="1706946042367" duration="10247000" />
       <workItem from="1707155046388" duration="132000" />
       <workItem from="1707155186617" duration="132000" />
-      <workItem from="1707155418013" duration="7170000" />
+      <workItem from="1707155418013" duration="8484000" />
     </task>
     <task id="LOCAL-00001" summary="Add .gitignore, Cargo.lock and Cargo.toml for new Rust project&#10;&#10;Added .gitignore file to exclude unnecessary files from git. Initialised new Rust project with Cargo.toml. This contains project description and dependencies such as Tokio, mjpeg_rs, etc. Also, added Cargo.lock which ensures that multiple builds of the same package will resolve and build identical copies of dependencies.">
       <option name="closed" value="true" />
@@ -333,7 +328,15 @@
       <option name="project" value="LOCAL" />
       <updated>1706952610821</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="Uhhm some stuff?">
+      <option name="closed" value="true" />
+      <created>1707199802581</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1707199802581</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -344,7 +347,19 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="master" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
           </value>
         </entry>
       </map>
@@ -363,6 +378,7 @@
     <MESSAGE value="Probably not important" />
     <MESSAGE value="Thought I should maybe make a commit" />
     <MESSAGE value="Locks and Caddyfile" />
-    <option name="LAST_COMMIT_MESSAGE" value="Locks and Caddyfile" />
+    <MESSAGE value="Uhhm some stuff?" />
+    <option name="LAST_COMMIT_MESSAGE" value="Uhhm some stuff?" />
   </component>
 </project>

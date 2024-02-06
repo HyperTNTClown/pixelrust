@@ -14,19 +14,26 @@ module.exports = {
         filename: "[name].js"
     },
     devServer: {
-        contentBase: dist,
         port: 8000,
-        disableHostCheck: true,
         compress: true,
+        static: dist,
     },
     plugins: [
-        new CopyPlugin([
-            path.resolve(__dirname, "static")
-        ]),
+        new CopyPlugin({
+            patterns: [
+                { from: "static", to: dist },
+            ],
+        }),
 
         new WasmPackPlugin({
             crateDirectory: __dirname,
             forceMode: "production",
         }),
-    ]
+    ],
+    optimization: {
+        minimize: false
+    },
+    experiments: {
+        asyncWebAssembly: true,
+    },
 };
