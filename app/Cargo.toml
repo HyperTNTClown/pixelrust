@@ -14,7 +14,6 @@ opt-level = 3
 [dependencies]
 wasm-bindgen = "0.2.90"
 wasm-bindgen-futures = "0.4.40"
-wee_alloc = "0.4.5"
 web-sys = { version = "0.3.67", features = ["console", "HtmlCanvasElement", "CanvasRenderingContext2d", "Window", "Document", "Response", "Blob", "ImageData", "EventSource", "MessageEvent", "EventListener", "TextEncoder", "Performance", "WebSocket"] }
 console_error_panic_hook = "0.1.7"
 rapid-qoi = "0.6.1"
