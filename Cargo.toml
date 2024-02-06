@@ -12,6 +12,7 @@ rayon = "1.8.1"
 crossbeam-channel = "0.5.11"
 brotli = "3.4.0"
 deflate = { version = "1.0.0", features = ["gzip"] }
+fdeflate = "0.3.4"
 base64 = "0.21.7"
 fastwebsockets = { version = "0.6.0", features = ["upgrade"] }
 sha1 = "0.11.0-pre.3"

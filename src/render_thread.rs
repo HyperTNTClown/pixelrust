@@ -1,40 +1,26 @@
 use crate::pixel_map::PixelMap;
-use crate::PX;
-use base64::alphabet::Alphabet;
 use base64::prelude::BASE64_STANDARD;
 use base64::Engine;
-use crossbeam_channel::{Receiver, RecvTimeoutError};
-use fastwebsockets::{Frame, Payload, Role};
-use sha1::digest::Update;
+use fastwebsockets::{FragmentCollector, Frame, Payload, Role, WebSocketError};
 use sha1::Digest;
 use std::io::{Read, Write};
 use std::net::TcpListener;
-use std::ops::Add;
 use std::sync::Arc;
-use std::time::{Duration, Instant};
 use std::{str, thread};
 use tokio::net::TcpStream;
-use tokio::runtime::{Handle, Runtime};
-use tokio::task::block_in_place;
+use tokio::runtime::Handle;
 
-pub(crate) fn render_thread(
-    pixel_map: Arc<PixelMap>,
-    rx_arc: Arc<Receiver<PX>>,
-    runtime_handle: Handle,
-) {
-    // think about caching again, 20ms is fast, but we can do better (maybe... probably... certainly)
+pub(crate) fn render_thread(pixel_map: Arc<PixelMap>, runtime_handle: Handle) {
     let arc_handle = Arc::new(runtime_handle);
 
     let server = TcpListener::bind("localhost:1338").unwrap();
     for stream in server.incoming() {
         let pixel_map = Arc::clone(&pixel_map);
-        let rx_arc = Arc::clone(&rx_arc);
         let arc_handle = Arc::clone(&arc_handle);
         thread::spawn(move || {
             handle_connection(
                 stream.unwrap(),
                 Arc::clone(&pixel_map),
-                Arc::clone(&rx_arc),
                 Arc::clone(&arc_handle),
             )
             .unwrap();
@@ -46,7 +32,6 @@ pub(crate) fn render_thread(
 fn handle_connection(
     mut stream: std::net::TcpStream,
     pixel_map: Arc<PixelMap>,
-    arc: Arc<Receiver<PX>>,
     runtime_handle: Arc<Handle>,
 ) -> std::io::Result<()> {
     let mut buffer = [0; 1024];
@@ -95,20 +80,22 @@ fn handle_connection(
         runtime_handle.block_on(async move {
             tokio::spawn(async move {
                 let tokio_stream = TcpStream::from_std(stream).unwrap();
-                let mut ws = fastwebsockets::WebSocket::after_handshake(tokio_stream, Role::Server);
-                ws.write_frame(Frame::text(Payload::Borrowed(
-                    b"Hello from Rust Websocket!",
-                )))
-                .await
-                .unwrap();
+                let ws = fastwebsockets::WebSocket::after_handshake(tokio_stream, Role::Server);
+                let mut ws = FragmentCollector::new(ws);
+                send_websocket_bytes_deflated(&mut ws, &*pixel_map.to_qoi())
+                    .await
+                    .unwrap();
                 loop {
-                    unsafe {
-                        let str = String::from_utf8_unchecked(
-                            ws.read_frame().await.unwrap().payload.to_vec(),
-                        );
-                        ws.write_frame(Frame::text(Payload::Borrowed(str.as_bytes())))
-                            .await
-                            .unwrap();
+                    let str = unsafe {
+                        match ws.read_frame().await {
+                            Ok(e) => String::from_utf8_unchecked(e.payload.to_vec()),
+                            Err(_) => "".to_string(),
+                        }
+                    };
+
+                    if str.contains("update") {
+                        let qoi = pixel_map.to_qoi();
+                        send_websocket_bytes_deflated(&mut ws, &*qoi).await.unwrap();
                     }
                 }
             })
@@ -151,4 +138,21 @@ fn handle_connection(
         //}
     }
     Ok(())
+}
+
+async fn send_websocket_bytes_deflated(
+    ws: &mut FragmentCollector<TcpStream>,
+    data: &[u8],
+) -> Result<(), WebSocketError> {
+    let comp = fdeflate::compress_to_vec(data);
+    ws.write_frame(Frame::binary(Payload::Owned(comp))).await
+}
+
+#[allow(dead_code)]
+async fn send_websocket_str_deflated(
+    ws: &mut FragmentCollector<TcpStream>,
+    data: &str,
+) -> Result<(), WebSocketError> {
+    println!("Sending: {}", data);
+    send_websocket_bytes_deflated(ws, data.as_bytes()).await
 }

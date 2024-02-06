@@ -1,12 +1,9 @@
 use crate::color::Color;
 use crate::pixel_map::PixelMap;
-use crossbeam_channel::internal::SelectHandle;
 use std::net::TcpListener;
-use std::os::fd::AsRawFd;
-use std::str::FromStr;
 use std::sync::atomic::Ordering::Relaxed;
 use std::sync::Arc;
-use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
+use tokio::io::{AsyncBufReadExt, AsyncReadExt, AsyncWriteExt, BufReader};
 use tokio::net::TcpStream;
 
 mod color;
@@ -17,9 +14,6 @@ static WIDTH: u32 = 1280;
 static HEIGHT: u32 = 720;
 
 fn main() {
-    let (tx, rx) = crossbeam_channel::unbounded::<PX>();
-    let tx_arc = Arc::new(tx);
-    let rx_arc = Arc::new(rx);
     let runtime = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()
@@ -35,51 +29,96 @@ fn main() {
         runtime.block_on(async move {
             let tcp_listener = TcpListener::bind("0.0.0.0:1337").unwrap();
             loop {
-                let tx = Arc::clone(&tx_arc);
                 let (socket, _) = tcp_listener.accept().unwrap();
                 let pixel_map = Arc::clone(&pixel_map);
                 tokio::spawn(async move {
                     let socket = TcpStream::from_std(socket).unwrap();
-                    handle_connection(socket, pixel_map, Arc::clone(&tx)).await;
+                    handle_connection(socket, pixel_map).await;
                 });
             }
         })
     });
 
-    // TODO: Array as background worker (to not block) on frontend - store in array (maybe localstorage???) because received data from server might not be complete.
-    //  - Send Data in raw binary tcp sockets, coordinates in one u32, color in another u32
-    //  - Maybe, just maybe add a timestamp to the data to prevent old data from overwriting new data
-    //  - Serve a webp or avif image as starting point for the frontend to easily load the image to the canvas
-    //  - Think about batching and compression for sending stuff to the frontend. We wouldn't want to have too much egress traffic
-
-    render_thread::render_thread(pix_clone, rx_arc, handle);
+    render_thread::render_thread(pix_clone, handle);
 }
 
-#[derive(Debug)]
-struct PX {
-    x: u32,
-    y: u32,
-    color: Color,
-}
-
-impl PX {
-    fn to_utf8(&self) -> String {
-        format!("{}_{}_{}", self.x, self.y, self.color.hex())
-    }
-}
-
-async fn handle_connection(
-    mut socket: TcpStream,
-    pixel_map: Arc<PixelMap>,
-    tx: Arc<crossbeam_channel::Sender<PX>>,
-) {
+async fn handle_connection(mut socket: TcpStream, mut pixel_map: Arc<PixelMap>) {
+    let mut binary = false;
     let mut debug = false;
     let (read_half, mut write_half) = socket.split();
     let mut message = String::new();
+    /* Binary Message Buffer
+    // Format:
+    // [u16: x][u16: y][u32: rgba]
+    //
+    // 2 bytes for x, 2 bytes for y, 4 bytes for rgb = 8 bytes (better padding than 7, so no rgb)
+    //
+    // 8 bytes * 1280 * 720 = 7_372_800 bytes = 7.3728 MB
+    //
+    // Instead of:
+    // - 2 bytes for 'PX',
+    // - 1 byte for ' ',
+    // - ~3 bytes for x,
+    // - 1 byte for ' ',
+    // - ~3 bytes for y,
+    // - 1 byte for ' ',
+    // - 6 bytes for hex,
+    // - 1 byte for '\n'
+    // = 18 bytes * 1280 * 720 = 18_432_000 bytes = 18.432 MB
+    //
+    // 55.56% less data
+     */
+    let mut bin_buf: [u8; 8] = [0; 8];
     let mut reader = BufReader::new(read_half);
     loop {
-        let pixel_map = pixel_map.clone();
+        let pixel_map = &mut pixel_map;
         message.clear();
+        if binary {
+            let bin_read_length = reader.read_exact(&mut bin_buf).await;
+            match bin_read_length {
+                Ok(e) => {
+                    if e != 8 {
+                        write_half
+                            .write("ERR: Invalid Binary Length\n".as_bytes())
+                            .await
+                            .unwrap();
+                        continue;
+                    }
+                    let x = u16::from_le_bytes([bin_buf[0], bin_buf[1]]) as u32;
+                    let y = u16::from_le_bytes([bin_buf[2], bin_buf[3]]) as u32;
+                    if x >= WIDTH || y >= HEIGHT {
+                        write_half
+                            .write("ERR: Out of Bounds (Tip: SIZE)\n".as_bytes())
+                            .await
+                            .unwrap();
+                        continue;
+                    }
+                    let color = Color::new(u32::from_le_bytes([
+                        bin_buf[4], bin_buf[5], bin_buf[6], bin_buf[7],
+                    ]));
+                    let mut original_color = pixel_map.get_color(x, y);
+                    original_color.overlay_mut(color);
+                    if debug {
+                        write_half
+                            .write(format!("PX {} {} {}\n", x, y, color.hex()).as_bytes())
+                            .await
+                            .unwrap_or(0);
+                        println!("PX {} {} {}", x, y, color.hex());
+                    }
+                    if original_color.equals(pixel_map.get_color(x, y)) {
+                        continue;
+                    }
+                    pixel_map
+                        .get_pixel(x, y)
+                        .store(original_color.raw(), Relaxed);
+                }
+                Err(e) => {
+                    println!("Error: {}", e);
+                    break;
+                }
+            }
+            continue;
+        }
         match reader.read_line(&mut message).await {
             Ok(0) => break,
             Ok(_) => {
@@ -153,12 +192,6 @@ async fn handle_connection(
                         pixel_map
                             .get_pixel(x, y)
                             .store(original_color.raw(), Relaxed);
-                        tx.try_send(PX {
-                            x,
-                            y,
-                            color: original_color,
-                        })
-                        .unwrap();
                     }
                     "SIZE" => {
                         let size = pixel_map.get_size();
@@ -176,9 +209,13 @@ async fn handle_connection(
                     "DEBUG" => {
                         debug = !debug;
                     }
+                    "BIN" => {
+                        binary = !binary;
+                        write_half.write(b"\xac\xce\x91").await.unwrap();
+                    }
                     "HELP" => {
                         write_half
-                            .write("Commands:\nPX x y [hex]\nSIZE\nEXIT\nDEBUG\nHELP\n".as_bytes())
+                            .write("Commands:\nPX x y [hex]\nSIZE\nEXIT\nDEBUG\nBIN (changes channel mode: [x:u16][y:u16][abgr:u32] LE)\nHELP\n".as_bytes())
                             .await
                             .unwrap();
                     }

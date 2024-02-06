@@ -4,7 +4,6 @@ use std::sync::atomic::Ordering::{Relaxed, SeqCst};
 use std::sync::atomic::{AtomicU32, AtomicUsize};
 use std::sync::Arc;
 use std::thread;
-use tokio::time::Instant;
 
 pub(crate) struct PixelMap {
     pixels: Vec<AtomicU32>,
@@ -89,19 +88,19 @@ impl PixelMap {
     pub fn to_qoi(&self) -> Arc<Box<[u8]>> {
         let w = self.get_width();
         let h = self.get_height();
-        let start = Instant::now();
+        //let start = Instant::now();
         let mut buf = Vec::with_capacity((w * h * 4) as usize);
         self.pixels
             .iter()
             .for_each(|x| Color::new(x.load(Relaxed)).add_to_vec(&mut buf));
-        println!("{:?} - after buffer creation", start.elapsed());
+        //println!("{:?} - after buffer creation", start.elapsed());
         let qoi = rapid_qoi::Qoi {
             width: 1280,
             height: 720,
             colors: rapid_qoi::Colors::Rgba,
         };
-        let mut qoi_buffer = qoi.encode_alloc(&buf).unwrap();
-        println!("{:?} - end", start.elapsed());
+        let qoi_buffer = qoi.encode_alloc(&buf).unwrap();
+        //println!("{:?} - end", start.elapsed());
 
         let qoi_arc = Arc::new(qoi_buffer.into_boxed_slice());
         let t_arc = Arc::clone(&qoi_arc);
