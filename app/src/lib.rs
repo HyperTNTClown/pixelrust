@@ -23,6 +23,14 @@ async fn main() {
         .await
         .unwrap();
     let res = e.unchecked_into::<web_sys::Response>();
+    let dimensions = res
+        .headers()
+        .get("Dimensions")
+        .unwrap()
+        .unwrap()
+        .split("x")
+        .map(|s| s.parse::<u32>().unwrap())
+        .collect::<Vec<u32>>();
     let s = JsFuture::from(res.blob().unwrap()).await.unwrap();
     let blob = Blob::from(s);
     let arr: ArrayBuffer = JsFuture::from(blob.array_buffer())
@@ -34,18 +42,38 @@ async fn main() {
         // Scoped to drop large image data quickly
         let img = ImageData::new_with_u8_clamped_array_and_sh(
             wasm_bindgen::Clamped(&*rapid_qoi::Qoi::decode_alloc(&*vec).unwrap().1),
-            1280,
-            720,
+            dimensions[0],
+            dimensions[1],
         )
         .unwrap();
         ctx.put_image_data(&img, 0.0, 0.0).unwrap();
     }
 
-    let ws = WebSocket::new("wss://localhost/api/ws").unwrap();
+    let ws = match web_sys::window()
+        .unwrap()
+        .location()
+        .protocol()
+        .unwrap()
+        .as_str()
+    {
+        "http:" => WebSocket::new(
+            &("ws://".to_owned()
+                + &*web_sys::window().unwrap().location().host().unwrap()
+                + "/api/ws"),
+        ),
+        "https:" | _ => WebSocket::new(
+            &("wss://".to_owned()
+                + &*web_sys::window().unwrap().location().host().unwrap()
+                + "/api/ws"),
+        ),
+    }
+    .unwrap();
     let mut closure_ws = ws.clone();
 
     //let ev = EventSource::new("/api/pixels").unwrap();
     let closure = Closure::wrap(Box::new(move |e: web_sys::Event| {
+        let dimensions = &dimensions;
+        let dimensions = dimensions.clone();
         let closure_ws = &mut closure_ws;
         let mut cl_ws = closure_ws.clone();
         let e = e.unchecked_into::<web_sys::MessageEvent>();
@@ -53,13 +81,14 @@ async fn main() {
         let ctx = &mut ctx;
         let mut ctx = ctx.clone();
         let cl = Closure::wrap(Box::new(move |arr| {
+            let dimensions = &dimensions;
             let cl_ws = &mut cl_ws;
             let vec = js_sys::Uint8Array::new(&arr).to_vec();
             let data = fdeflate::decompress_to_vec(&vec).unwrap();
             let img = ImageData::new_with_u8_clamped_array_and_sh(
                 wasm_bindgen::Clamped(&*rapid_qoi::Qoi::decode_alloc(&*data).unwrap().1),
-                1280,
-                720,
+                dimensions[0],
+                dimensions[1],
             );
             let ctx = &mut ctx;
             let ctx = ctx.clone();

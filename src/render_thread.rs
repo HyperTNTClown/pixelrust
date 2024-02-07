@@ -34,7 +34,7 @@ fn handle_connection(
     pixel_map: Arc<PixelMap>,
     runtime_handle: Arc<Handle>,
 ) -> std::io::Result<()> {
-    let mut buffer = [0; 1024];
+    let mut buffer = [0; 8192];
     stream.read(&mut buffer)?;
     let path = std::str::from_utf8(&buffer)
         .unwrap()
@@ -49,6 +49,11 @@ fn handle_connection(
         let response = b"HTTP/1.1 200 OK\r\nContent-Type: image/qoi\r\n";
         let qoi = pixel_map.to_qoi();
         stream.write(response)?;
+        stream.write(b"Dimensions: ")?;
+        stream.write(pixel_map.get_width().to_string().as_bytes())?;
+        stream.write(b"x")?;
+        stream.write(pixel_map.get_height().to_string().as_bytes())?;
+        stream.write(b"\r\n")?;
         stream.write(b"Content-Length: ")?;
         stream.write(qoi.len().to_string().as_bytes())?;
         stream.write(b"\r\n\r\n")?;
@@ -59,10 +64,11 @@ fn handle_connection(
         let response =
             b"HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n";
         let key = unsafe {
+            //println!("{}", str::from_utf8_unchecked(&buffer));
             // IT SHOULD ALREADY BE VALID UTF-8. IF NOT IT WOULD'VE FAILED WHEN PARSING FOR THE PATH
-            std::str::from_utf8_unchecked(&buffer)
+            str::from_utf8_unchecked(&buffer)
                 .lines()
-                .find(|x| x.to_lowercase().contains("sec-websocket-key: "))
+                .find(|x| x.to_lowercase().contains("sec-websocket-key"))
                 .unwrap()
                 .split(": ")
                 .skip(1)
@@ -100,42 +106,6 @@ fn handle_connection(
                 }
             })
         });
-    } else {
-        // TODO: SWITCH TO WEBSOCKETS SO THE CLIENT CAN SIMPLY REQUEST THE NEW IMAGE (TO NOT OVERWHELM THEM) AND IT DOES NOT NEED TO BE IN BASE64 (SIZE SAVINGS)
-        let response = b"HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\n";
-        stream.write(response)?;
-        stream.write(b"Cache-Control: no-cache\r\n")?;
-        stream.write(b"Connection: keep-alive\r\n")?;
-        stream.write(b"Content-Encoding: br\r\n")?;
-        stream.write(b"\r\n")?;
-        stream.flush()?;
-        let mut comp_writer = brotli::CompressorWriter::new(&mut stream, 4096, 11, 22);
-        loop {
-            // A bit of delay
-            //thread::sleep(Duration::from_millis(16));
-            let qoi = pixel_map.to_qoi();
-            let base = BASE64_STANDARD.encode(&*qoi);
-            comp_writer.write(b"data: ")?;
-            comp_writer.write_all(&*base.as_bytes())?;
-            comp_writer.write(b"\n\n")?;
-            comp_writer.flush()?;
-        }
-        //loop {
-        //    match arc.recv_timeout(Duration::from_secs(1)) {
-        //        Ok(px) => {
-        //            let v = arc.try_iter().map(|x| x.to_utf8()).collect::<Vec<String>>();
-        //            let e = px.to_utf8() + ";" + &*v.join(";");
-        //            comp_writer.write(b"data: ").unwrap();
-        //            comp_writer.write_all(&*e.as_bytes()).unwrap();
-        //            comp_writer.write(b"\n\n")?;
-        //            comp_writer.flush()?;
-        //        }
-        //        Err(_) => {
-        //            comp_writer.write(b":keepalive\n\n")?;
-        //            comp_writer.flush()?;
-        //        }
-        //    }
-        //}
     }
     Ok(())
 }

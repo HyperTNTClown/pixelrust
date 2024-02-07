@@ -10,9 +10,6 @@ mod color;
 mod pixel_map;
 mod render_thread;
 
-static WIDTH: u32 = 1280;
-static HEIGHT: u32 = 720;
-
 fn main() {
     let runtime = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
@@ -43,6 +40,8 @@ fn main() {
 }
 
 async fn handle_connection(mut socket: TcpStream, mut pixel_map: Arc<PixelMap>) {
+    let width: u32 = pixel_map.get_width();
+    let height: u32 = pixel_map.get_height();
     let mut binary = false;
     let mut debug = false;
     let (read_half, mut write_half) = socket.split();
@@ -86,7 +85,7 @@ async fn handle_connection(mut socket: TcpStream, mut pixel_map: Arc<PixelMap>) 
                     }
                     let x = u16::from_le_bytes([bin_buf[0], bin_buf[1]]) as u32;
                     let y = u16::from_le_bytes([bin_buf[2], bin_buf[3]]) as u32;
-                    if x >= WIDTH || y >= HEIGHT {
+                    if x >= width || y >= height {
                         write_half
                             .write("ERR: Out of Bounds (Tip: SIZE)\n".as_bytes())
                             .await
@@ -148,14 +147,14 @@ async fn handle_connection(mut socket: TcpStream, mut pixel_map: Arc<PixelMap>) 
                             }
                         };
                         match (x, y) {
-                            coords if coords.0 == WIDTH || coords.1 == HEIGHT => {
+                            coords if coords.0 == width || coords.1 == height => {
                                 write_half
                                     .write("ERR: 0 based index...\n".as_bytes())
                                     .await
                                     .unwrap();
                                 continue;
                             }
-                            coords if coords.0 > WIDTH || coords.1 > HEIGHT => {
+                            coords if coords.0 > width || coords.1 > height => {
                                 write_half
                                     .write("ERR: Out of Bounds (Tip: SIZE)\n".as_bytes())
                                     .await

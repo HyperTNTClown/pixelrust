@@ -29,12 +29,14 @@ impl PixelMap {
     }
 
     pub fn load_image(filename: &str) -> PixelMap {
-        let img = std::fs::read(filename);
-        if img.is_err() {
-            return PixelMap::new(1280, 720);
-        }
-        let img = img.unwrap();
-        let qoi = rapid_qoi::Qoi::decode_alloc(&*img).unwrap();
+        let img = match std::fs::read(filename) {
+            Ok(x) => x,
+            Err(_) => return PixelMap::new(1280, 720),
+        };
+        let qoi = match rapid_qoi::Qoi::decode_alloc(&*img) {
+            Ok(x) => x,
+            Err(_) => return PixelMap::new(1280, 720),
+        };
         let (width, height) = (qoi.0.width, qoi.0.height);
         let mut pixels = Vec::new();
         for y in 0..height {
@@ -88,24 +90,20 @@ impl PixelMap {
     pub fn to_qoi(&self) -> Arc<Box<[u8]>> {
         let w = self.get_width();
         let h = self.get_height();
-        //let start = Instant::now();
         let mut buf = Vec::with_capacity((w * h * 4) as usize);
         self.pixels
             .iter()
             .for_each(|x| Color::new(x.load(Relaxed)).add_to_vec(&mut buf));
-        //println!("{:?} - after buffer creation", start.elapsed());
         let qoi = rapid_qoi::Qoi {
-            width: 1280,
-            height: 720,
-            colors: rapid_qoi::Colors::Rgba,
+            width: w,
+            height: h,
+            colors: Colors::Rgba,
         };
         let qoi_buffer = qoi.encode_alloc(&buf).unwrap();
-        //println!("{:?} - end", start.elapsed());
 
         let qoi_arc = Arc::new(qoi_buffer.into_boxed_slice());
         let t_arc = Arc::clone(&qoi_arc);
         thread::spawn(move || {
-            // save to image.qoi
             std::fs::write("image.qoi", &*t_arc).unwrap();
         });
 

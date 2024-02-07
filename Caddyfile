@@ -1,6 +1,6 @@
-macbook, localhost {
-	tls internal
-	reverse_proxy * localhost:8000
+:8080 {
+	root * ./dist/
+	file_server
 	handle_path /api/* {
 		rewrite * /api{uri}
 		reverse_proxy * localhost:1338

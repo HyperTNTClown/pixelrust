@@ -1,0 +1,7 @@
+**/target
+**/dist
+**/build
+**/node_modules
+**/.idea
+**/pkg
+image.qoi
