@@ -31,6 +31,8 @@ async fn main() {
         .split("x")
         .map(|s| s.parse::<u32>().unwrap())
         .collect::<Vec<u32>>();
+    el.set_width(dimensions[0]);
+    el.set_height(dimensions[1]);
     let s = JsFuture::from(res.blob().unwrap()).await.unwrap();
     let blob = Blob::from(s);
     let arr: ArrayBuffer = JsFuture::from(blob.array_buffer())
