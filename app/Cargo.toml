@@ -19,6 +19,5 @@ wasm-bindgen-futures = "0.4.40"
 web-sys = { version = "0.3.67", features = ["console", "HtmlCanvasElement", "CanvasRenderingContext2d", "Window", "Document", "Response", "Blob", "ImageData", "EventSource", "MessageEvent", "EventListener", "TextEncoder", "Performance", "WebSocket", "Location", "Headers"] }
 console_error_panic_hook = "0.1.7"
 rapid-qoi = "0.6.1"
-base64 = "0.21.7"
 js-sys = "0.3.67"
 fdeflate = "0.3.4"

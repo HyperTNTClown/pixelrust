@@ -3,12 +3,6 @@
 version = 3
 
 [[package]]
-name = "base64"
-version = "0.21.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9d297deb1925b89f2ccc13d7635fa0714f12c87adce1c75356b39ca9b7178567"
-
-[[package]]
 name = "bumpalo"
 version = "3.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -70,7 +64,6 @@ checksum = "3fdb12b2476b595f9358c5161aa467c2438859caa136dec86c26fdd2efe17b92"
 name = "pixelrust-frontend-wasm"
 version = "0.1.0"
 dependencies = [
- "base64",
  "console_error_panic_hook",
  "fdeflate",
  "js-sys",
