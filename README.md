@@ -31,7 +31,7 @@ docker build -t pixelrust .
 
 After the image is built, you can run the server using the following command:
 ```sh
-docker run -p 8080:8080 -p 1337:1337 -v $(pwd)/image.qoi:/app/image.qoi: pixelrust
+docker run -p 8080:8080 -p 1337:1337 -v $(pwd)/image.qoi:/app/image.qoi pixelrust
 ```
 
 The frontend will then be running on port 8080 and the pixelflut server will be running on port 1337.
