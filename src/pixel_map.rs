@@ -2,7 +2,7 @@ use crate::color::Color;
 use rapid_qoi::Colors;
 use std::sync::atomic::Ordering::{Relaxed, SeqCst};
 use std::sync::atomic::{AtomicU32, AtomicUsize};
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
 use std::thread;
 
 pub(crate) struct PixelMap {
@@ -10,6 +10,7 @@ pub(crate) struct PixelMap {
     width: AtomicU32,
     height: AtomicU32,
     version: AtomicUsize,
+    cache: RwLock<Arc<Box<[u8]>>>,
 }
 
 impl PixelMap {
@@ -25,6 +26,7 @@ impl PixelMap {
             width: AtomicU32::new(width),
             height: AtomicU32::new(height),
             version: AtomicUsize::new(1),
+            cache: RwLock::new(Arc::new(Box::new([0]))),
         }
     }
 
@@ -63,6 +65,7 @@ impl PixelMap {
             width: AtomicU32::new(width),
             height: AtomicU32::new(height),
             version: AtomicUsize::new(1),
+            cache: RwLock::new(Arc::new(Box::new([0]))),
         }
     }
 
@@ -87,7 +90,17 @@ impl PixelMap {
         (self.get_width(), self.get_height())
     }
 
-    pub fn to_qoi(&self) -> Arc<Box<[u8]>> {
+    pub fn to_qoi(&self) -> (Arc<Box<[u8]>>, bool) {
+        if self.version.load(SeqCst) == 0 {
+            match self.cache.read() {
+                Ok(cache) => {
+                    return (cache.clone(), true);
+                }
+                Err(_) => {
+                    println!("Failed to get the read-lock for the cache, will just try generating a new one...")
+                }
+            };
+        }
         let w = self.get_width();
         let h = self.get_height();
         let mut buf = Vec::with_capacity((w * h * 4) as usize);
@@ -107,24 +120,39 @@ impl PixelMap {
             std::fs::write("image.qoi", &*t_arc).unwrap();
         });
 
-        qoi_arc
+        {
+            match self.cache.write() {
+                Ok(mut write) => {
+                    *write = qoi_arc.clone();
+                    self.version.store(0, SeqCst);
+                }
+                Err(_) => {
+                    println!("Failed to get write lock for the cache...")
+                }
+            }
+        }
+
+        (qoi_arc, false)
     }
 }
 
-impl Clone for PixelMap {
-    fn clone(&self) -> Self {
-        let mut pixels = Vec::new();
-        for x in 0..self.width.load(Relaxed) {
-            for y in 0..self.height.load(Relaxed) {
-                let pixel = self.pixels[(x * y) as usize].load(Relaxed);
-                pixels.push(AtomicU32::new(pixel));
-            }
-        }
-        PixelMap {
-            pixels,
-            width: AtomicU32::new(self.width.load(Relaxed)),
-            height: AtomicU32::new(self.height.load(Relaxed)),
-            version: AtomicUsize::new(self.version.load(Relaxed)),
-        }
-    }
-}
+// Why did I even have a Clone implementation??? I'm passing around Arcs
+
+// impl Clone for PixelMap {
+//     fn clone(&self) -> Self {
+//         let mut pixels = Vec::new();
+//         for x in 0..self.width.load(Relaxed) {
+//             for y in 0..self.height.load(Relaxed) {
+//                 let pixel = self.pixels[(x * y) as usize].load(Relaxed);
+//                 pixels.push(AtomicU32::new(pixel));
+//             }
+//         }
+//         PixelMap {
+//             pixels,
+//             width: AtomicU32::new(self.width.load(Relaxed)),
+//             height: AtomicU32::new(self.height.load(Relaxed)),
+//             version: AtomicUsize::new(self.version.load(Relaxed)),
+//             cache: Default::default(),
+//         }
+//     }
+// }

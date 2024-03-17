@@ -47,7 +47,7 @@ async fn main() {
             dimensions[0],
             dimensions[1],
         )
-        .unwrap();
+            .unwrap();
         ctx.put_image_data(&img, 0.0, 0.0).unwrap();
     }
 
@@ -69,7 +69,7 @@ async fn main() {
                 + "/api/ws"),
         ),
     }
-    .unwrap();
+        .unwrap();
     let mut closure_ws = ws.clone();
 
     //let ev = EventSource::new("/api/pixels").unwrap();
@@ -87,14 +87,18 @@ async fn main() {
             let cl_ws = &mut cl_ws;
             let vec = js_sys::Uint8Array::new(&arr).to_vec();
             let data = fdeflate::decompress_to_vec(&vec).unwrap();
-            let img = ImageData::new_with_u8_clamped_array_and_sh(
-                wasm_bindgen::Clamped(&*rapid_qoi::Qoi::decode_alloc(&*data).unwrap().1),
-                dimensions[0],
-                dimensions[1],
-            );
-            let ctx = &mut ctx;
-            let ctx = ctx.clone();
-            ctx.put_image_data(&img.unwrap(), 0.0, 0.0).unwrap();
+            if data != vec![0u8] {
+                let img = ImageData::new_with_u8_clamped_array_and_sh(
+                    wasm_bindgen::Clamped(&*rapid_qoi::Qoi::decode_alloc(&*data).unwrap().1),
+                    dimensions[0],
+                    dimensions[1],
+                );
+                let ctx = &mut ctx;
+                let ctx = ctx.clone();
+                ctx.put_image_data(&img.unwrap(), 0.0, 0.0).unwrap();
+            } else {
+                // web_sys::console::log_1(&JsValue::from_str("Got null-byte. Not changing anything"))
+            }
             cl_ws.send_with_str("update").unwrap();
         }) as Box<dyn FnMut(_)>);
         let _ = blob.array_buffer().then(&cl);

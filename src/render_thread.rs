@@ -7,6 +7,7 @@ use std::io::{Read, Write};
 use std::net::TcpListener;
 use std::sync::Arc;
 use std::{str, thread};
+use std::time::Instant;
 use tokio::net::TcpStream;
 use tokio::runtime::Handle;
 
@@ -23,7 +24,7 @@ pub(crate) fn render_thread(pixel_map: Arc<PixelMap>, runtime_handle: Handle) {
                 Arc::clone(&pixel_map),
                 Arc::clone(&arc_handle),
             )
-            .unwrap();
+                .unwrap();
         });
     }
 }
@@ -46,7 +47,7 @@ fn handle_connection(
         .unwrap();
     if path.contains("canvas") {
         let response = b"HTTP/1.1 200 OK\r\nContent-Type: image/qoi\r\n";
-        let qoi = pixel_map.to_qoi();
+        let qoi = pixel_map.to_qoi().0;
         stream.write_all(response)?;
         stream.write_all(b"Dimensions: ")?;
         stream.write_all(pixel_map.get_width().to_string().as_bytes())?;
@@ -86,7 +87,7 @@ fn handle_connection(
                 let tokio_stream = TcpStream::from_std(stream).unwrap();
                 let ws = fastwebsockets::WebSocket::after_handshake(tokio_stream, Role::Server);
                 let mut ws = FragmentCollector::new(ws);
-                send_websocket_bytes_deflated(&mut ws, &pixel_map.to_qoi())
+                send_websocket_bytes_deflated(&mut ws, &pixel_map.to_qoi().0)
                     .await
                     .unwrap();
                 loop {
@@ -98,13 +99,19 @@ fn handle_connection(
                     };
 
                     if str.contains("update") {
+                        let instant = Instant::now();
                         let qoi = pixel_map.to_qoi();
-                        send_websocket_bytes_deflated(&mut ws, &qoi).await.unwrap();
+                        if qoi.1 {
+                            // send null-byte to indicate, that nothing has changed
+                            send_websocket_bytes_deflated(&mut ws, &*vec![0u8]).await.unwrap();
+                        } else {
+                            send_websocket_bytes_deflated(&mut ws, &qoi.0).await.unwrap();
+                        }
                     }
                 }
             })
-            .await
-            .unwrap();
+                .await
+                .unwrap();
         });
     }
     Ok(())
