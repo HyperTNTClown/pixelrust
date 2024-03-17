@@ -99,7 +99,6 @@ fn handle_connection(
                     };
 
                     if str.contains("update") {
-                        let instant = Instant::now();
                         let qoi = pixel_map.to_qoi();
                         if qoi.1 {
                             // send null-byte to indicate, that nothing has changed
