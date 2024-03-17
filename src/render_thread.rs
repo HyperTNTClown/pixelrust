@@ -90,11 +90,16 @@ fn handle_connection(
                 send_websocket_bytes_deflated(&mut ws, &pixel_map.to_qoi().0)
                     .await
                     .unwrap();
-                loop {
+                'out: loop {
                     let str = unsafe {
                         match ws.read_frame().await {
                             Ok(e) => String::from_utf8_unchecked(e.payload.to_vec()),
-                            Err(_) => "".to_string(),
+                            Err(e) => {
+                                match e {
+                                    WebSocketError::ConnectionClosed => break 'out,
+                                    _ => { "".to_string() }
+                                }
+                            }
                         }
                     };
 
