@@ -24,11 +24,11 @@ Pixels in binary mode are sent in the following format:
 Binary mode on average is about half the size of the text mode, so it is recommended to use binary mode when sending large amounts of pixel data. 
 ## Usage
 ### Docker (recommended)
-It is easiest and probably best to run this project using docker. There currently are no published images, so you have to build the image yourself. You can do this by running the following command in the root directory of this project:
+It is easiest and probably best to run this project using docker. There currently are no published images, so you have to build the image yourself. You can do this by running the following command:
 ```sh
-docker build -t pixelrust .
+docker build -t pixelrust https://github.com/HyperTNTClown/pixelrust.git
 ```
-
+It will then pull from the repository and build the docker image tagged as pixelrust.
 After the image is built, you can run the server using the following command:
 ```sh
 docker run -p 8080:8080 -p 1337:1337 -v $(pwd)/image.qoi:/app/image.qoi pixelrust
