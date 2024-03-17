@@ -35,29 +35,28 @@ fn handle_connection(
     runtime_handle: Arc<Handle>,
 ) -> std::io::Result<()> {
     let mut buffer = [0; 8192];
-    stream.read(&mut buffer)?;
+    let _amount = stream.read(&mut buffer)?;
     let path = std::str::from_utf8(&buffer)
         .unwrap()
         .lines()
         .next()
         .unwrap()
         .split_whitespace()
-        .skip(1)
-        .next()
+        .nth(1)
         .unwrap();
     if path.contains("canvas") {
         let response = b"HTTP/1.1 200 OK\r\nContent-Type: image/qoi\r\n";
         let qoi = pixel_map.to_qoi();
-        stream.write(response)?;
-        stream.write(b"Dimensions: ")?;
-        stream.write(pixel_map.get_width().to_string().as_bytes())?;
-        stream.write(b"x")?;
-        stream.write(pixel_map.get_height().to_string().as_bytes())?;
-        stream.write(b"\r\n")?;
-        stream.write(b"Content-Length: ")?;
-        stream.write(qoi.len().to_string().as_bytes())?;
-        stream.write(b"\r\n\r\n")?;
-        stream.write(&**qoi)?;
+        stream.write_all(response)?;
+        stream.write_all(b"Dimensions: ")?;
+        stream.write_all(pixel_map.get_width().to_string().as_bytes())?;
+        stream.write_all(b"x")?;
+        stream.write_all(pixel_map.get_height().to_string().as_bytes())?;
+        stream.write_all(b"\r\n")?;
+        stream.write_all(b"Content-Length: ")?;
+        stream.write_all(qoi.len().to_string().as_bytes())?;
+        stream.write_all(b"\r\n\r\n")?;
+        stream.write_all(&qoi)?;
         stream.flush()?;
         stream.shutdown(std::net::Shutdown::Both)?;
     } else if path.contains("ws") {
@@ -71,24 +70,23 @@ fn handle_connection(
                 .find(|x| x.to_lowercase().contains("sec-websocket-key"))
                 .unwrap()
                 .split(": ")
-                .skip(1)
-                .next()
+                .nth(1)
                 .unwrap()
         };
         let mut sha = sha1::Sha1::new();
         Digest::update(&mut sha, key.as_bytes());
         Digest::update(&mut sha, b"258EAFA5-E914-47DA-95CA-C5AB0DC85B11");
         let accept = BASE64_STANDARD.encode(&sha.finalize().0[..]);
-        stream.write(response)?;
-        stream.write(b"Sec-WebSocket-Accept: ")?;
-        stream.write(accept.as_bytes())?;
-        stream.write(b"\r\n\r\n")?;
+        stream.write_all(response)?;
+        stream.write_all(b"Sec-WebSocket-Accept: ")?;
+        stream.write_all(accept.as_bytes())?;
+        stream.write_all(b"\r\n\r\n")?;
         runtime_handle.block_on(async move {
             tokio::spawn(async move {
                 let tokio_stream = TcpStream::from_std(stream).unwrap();
                 let ws = fastwebsockets::WebSocket::after_handshake(tokio_stream, Role::Server);
                 let mut ws = FragmentCollector::new(ws);
-                send_websocket_bytes_deflated(&mut ws, &*pixel_map.to_qoi())
+                send_websocket_bytes_deflated(&mut ws, &pixel_map.to_qoi())
                     .await
                     .unwrap();
                 loop {
@@ -101,10 +99,12 @@ fn handle_connection(
 
                     if str.contains("update") {
                         let qoi = pixel_map.to_qoi();
-                        send_websocket_bytes_deflated(&mut ws, &*qoi).await.unwrap();
+                        send_websocket_bytes_deflated(&mut ws, &qoi).await.unwrap();
                     }
                 }
             })
+            .await
+            .unwrap();
         });
     }
     Ok(())

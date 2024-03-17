@@ -12,9 +12,17 @@
   "devDependencies": {
     "@wasm-tool/wasm-pack-plugin": "1.7.0",
     "copy-webpack-plugin": "12.0.2",
+    "less": "^4.2.0",
+    "less-loader": "^12.2.0",
     "rimraf": "5.0.5",
     "webpack": "5.90.1",
     "webpack-cli": "5.1.4",
     "webpack-dev-server": "4.15.1"
+  },
+  "dependencies": {
+    "css-loader": "^6.10.0",
+    "motion": "^10.17.0",
+    "open-props": "^1.6.19",
+    "style-loader": "^3.3.4"
   }
 }

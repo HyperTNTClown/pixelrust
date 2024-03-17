@@ -78,7 +78,7 @@ async fn handle_connection(mut socket: TcpStream, mut pixel_map: Arc<PixelMap>) 
                 Ok(e) => {
                     if e != 8 {
                         write_half
-                            .write("ERR: Invalid Binary Length\n".as_bytes())
+                            .write_all("ERR: Invalid Binary Length\n".as_bytes())
                             .await
                             .unwrap();
                         continue;
@@ -87,7 +87,7 @@ async fn handle_connection(mut socket: TcpStream, mut pixel_map: Arc<PixelMap>) 
                     let y = u16::from_le_bytes([bin_buf[2], bin_buf[3]]) as u32;
                     if x >= width || y >= height {
                         write_half
-                            .write("ERR: Out of Bounds (Tip: SIZE)\n".as_bytes())
+                            .write_all("ERR: Out of Bounds (Tip: SIZE)\n".as_bytes())
                             .await
                             .unwrap();
                         continue;
@@ -99,9 +99,9 @@ async fn handle_connection(mut socket: TcpStream, mut pixel_map: Arc<PixelMap>) 
                     original_color.overlay_mut(color);
                     if debug {
                         write_half
-                            .write(format!("PX {} {} {}\n", x, y, color.hex()).as_bytes())
+                            .write_all(format!("PX {} {} {}\n", x, y, color.hex()).as_bytes())
                             .await
-                            .unwrap_or(0);
+                            .unwrap_or(());
                         println!("PX {} {} {}", x, y, color.hex());
                     }
                     if original_color.equals(pixel_map.get_color(x, y)) {
@@ -122,7 +122,7 @@ async fn handle_connection(mut socket: TcpStream, mut pixel_map: Arc<PixelMap>) 
             Ok(0) => break,
             Ok(_) => {
                 let message = message.trim();
-                let mut split = message.split(" ");
+                let mut split = message.split(' ');
                 let command = split.next().unwrap();
                 match command {
                     "PX" => {
@@ -130,7 +130,7 @@ async fn handle_connection(mut socket: TcpStream, mut pixel_map: Arc<PixelMap>) 
                             Some(x) => x.parse::<u32>().unwrap(),
                             None => {
                                 write_half
-                                    .write("ERR: Missing X\n".as_bytes())
+                                    .write_all("ERR: Missing X\n".as_bytes())
                                     .await
                                     .unwrap();
                                 continue;
@@ -140,7 +140,7 @@ async fn handle_connection(mut socket: TcpStream, mut pixel_map: Arc<PixelMap>) 
                             Some(y) => y.parse::<u32>().unwrap(),
                             None => {
                                 write_half
-                                    .write("ERR: Missing Y\n".as_bytes())
+                                    .write_all("ERR: Missing Y\n".as_bytes())
                                     .await
                                     .unwrap();
                                 continue;
@@ -149,14 +149,14 @@ async fn handle_connection(mut socket: TcpStream, mut pixel_map: Arc<PixelMap>) 
                         match (x, y) {
                             coords if coords.0 == width || coords.1 == height => {
                                 write_half
-                                    .write("ERR: 0 based index...\n".as_bytes())
+                                    .write_all("ERR: 0 based index...\n".as_bytes())
                                     .await
                                     .unwrap();
                                 continue;
                             }
                             coords if coords.0 > width || coords.1 > height => {
                                 write_half
-                                    .write("ERR: Out of Bounds (Tip: SIZE)\n".as_bytes())
+                                    .write_all("ERR: Out of Bounds (Tip: SIZE)\n".as_bytes())
                                     .await
                                     .unwrap();
                                 continue;
@@ -166,7 +166,7 @@ async fn handle_connection(mut socket: TcpStream, mut pixel_map: Arc<PixelMap>) 
                         let next = split.next();
                         if next.is_none() {
                             write_half
-                                .write(
+                                .write_all(
                                     format!("PX {} {} {}\n", x, y, pixel_map.get_color(x, y))
                                         .as_bytes(),
                                 )
@@ -180,9 +180,9 @@ async fn handle_connection(mut socket: TcpStream, mut pixel_map: Arc<PixelMap>) 
                         original_color.overlay_mut(color);
                         if debug {
                             write_half
-                                .write(format!("PX {} {} {}\n", x, y, hex_color).as_bytes())
+                                .write_all(format!("PX {} {} {}\n", x, y, hex_color).as_bytes())
                                 .await
-                                .unwrap_or(0);
+                                .unwrap_or(());
                             println!("PX {} {} {}", x, y, hex_color);
                         }
                         if original_color.equals(pixel_map.get_color(x, y)) {
@@ -195,13 +195,13 @@ async fn handle_connection(mut socket: TcpStream, mut pixel_map: Arc<PixelMap>) 
                     "SIZE" => {
                         let size = pixel_map.get_size();
                         write_half
-                            .write(format!("SIZE {} {}\n", size.0, size.1).as_bytes())
+                            .write_all(format!("SIZE {} {}\n", size.0, size.1).as_bytes())
                             .await
                             .unwrap();
                     }
                     "EXIT" => {
                         // exit program
-                        write_half.write("EXITING\n".as_bytes()).await.unwrap();
+                        write_half.write_all("EXITING\n".as_bytes()).await.unwrap();
                         write_half.flush().await.unwrap();
                         return;
                     }
@@ -210,17 +210,17 @@ async fn handle_connection(mut socket: TcpStream, mut pixel_map: Arc<PixelMap>) 
                     }
                     "BIN" => {
                         binary = !binary;
-                        write_half.write(b"\xac\xce\x91").await.unwrap();
+                        write_half.write_all(b"\xac\xce\x91").await.unwrap();
                     }
                     "HELP" => {
                         write_half
-                            .write("Commands:\nPX x y [hex]\nSIZE\nEXIT\nDEBUG\nBIN (changes channel mode: [x:u16][y:u16][rgba:u32] LE)\nHELP\n".as_bytes())
+                            .write_all("Commands:\nPX x y [hex]\nSIZE\nEXIT\nDEBUG\nBIN (changes channel mode: [x:u16][y:u16][rgba:u32] LE)\nHELP\n".as_bytes())
                             .await
                             .unwrap();
                     }
                     _ => {
                         write_half
-                            .write("ERR: Unknown Command\n".as_bytes())
+                            .write_all("ERR: Unknown Command\n".as_bytes())
                             .await
                             .unwrap();
                     }

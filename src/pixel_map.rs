@@ -33,7 +33,7 @@ impl PixelMap {
             Ok(x) => x,
             Err(_) => return PixelMap::new(1280, 720),
         };
-        let qoi = match rapid_qoi::Qoi::decode_alloc(&*img) {
+        let qoi = match rapid_qoi::Qoi::decode_alloc(&img) {
             Ok(x) => x,
             Err(_) => return PixelMap::new(1280, 720),
         };

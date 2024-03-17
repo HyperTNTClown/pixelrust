@@ -21,7 +21,7 @@ module.exports = {
     plugins: [
         new CopyPlugin({
             patterns: [
-                { from: "static", to: dist },
+                {from: "static", to: dist},
             ],
         }),
 
@@ -36,4 +36,17 @@ module.exports = {
     experiments: {
         asyncWebAssembly: true,
     },
+    module: {
+        rules: [
+            {
+                test: /\.less$/i,
+                use: [
+                    // compiles Less to CSS
+                    "style-loader",
+                    "css-loader",
+                    "less-loader",
+                ],
+            },
+        ],
+    }
 };

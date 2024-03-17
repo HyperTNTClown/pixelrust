@@ -76,7 +76,7 @@ impl Color {
     }
 
     #[allow(dead_code)]
-    pub fn to_rgb(&self) -> [u8; 3] {
+    pub fn to_rgb(self) -> [u8; 3] {
         [self.r(), self.g(), self.b()]
     }
 
