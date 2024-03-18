@@ -3,7 +3,7 @@ use rapid_qoi::Colors;
 use std::sync::atomic::Ordering::{Relaxed, SeqCst};
 use std::sync::atomic::{AtomicU32, AtomicUsize};
 use std::sync::{Arc, RwLock};
-use std::thread;
+use tokio::runtime::Handle;
 
 pub(crate) struct PixelMap {
     pixels: Vec<AtomicU32>,
@@ -90,7 +90,7 @@ impl PixelMap {
         (self.get_width(), self.get_height())
     }
 
-    pub fn to_qoi(&self) -> (Arc<Box<[u8]>>, bool) {
+    pub fn to_qoi(&self, tokio_handle: Arc<Handle>) -> (Arc<Box<[u8]>>, bool) {
         if self.version.load(SeqCst) == 0 {
             match self.cache.read() {
                 Ok(cache) => {
@@ -116,8 +116,8 @@ impl PixelMap {
 
         let qoi_arc = Arc::new(qoi_buffer.into_boxed_slice());
         let t_arc = Arc::clone(&qoi_arc);
-        thread::spawn(move || {
-            std::fs::write("image.qoi", &*t_arc).unwrap();
+        tokio_handle.spawn(async move {
+            tokio::fs::write("image.qoi", &*t_arc).await.unwrap();
         });
 
         {

@@ -1,10 +1,12 @@
+use std::sync::Arc;
+use std::sync::atomic::Ordering::Relaxed;
+
+use tokio::io::{AsyncBufReadExt, AsyncReadExt, AsyncWriteExt, BufReader};
+use tokio::net::{TcpListener, TcpStream};
+use tokio::runtime;
+
 use crate::color::Color;
 use crate::pixel_map::PixelMap;
-use std::net::TcpListener;
-use std::sync::atomic::Ordering::Relaxed;
-use std::sync::Arc;
-use tokio::io::{AsyncBufReadExt, AsyncReadExt, AsyncWriteExt, BufReader};
-use tokio::net::TcpStream;
 
 mod color;
 mod pixel_map;
@@ -22,21 +24,18 @@ fn main() {
 
     let pix_clone = Arc::clone(&pixel_map);
 
-    std::thread::spawn(move || {
-        runtime.block_on(async move {
-            let tcp_listener = TcpListener::bind("0.0.0.0:1337").unwrap();
-            loop {
-                let (socket, _) = tcp_listener.accept().unwrap();
-                let pixel_map = Arc::clone(&pixel_map);
-                tokio::spawn(async move {
-                    let socket = TcpStream::from_std(socket).unwrap();
-                    handle_connection(socket, pixel_map).await;
-                });
-            }
-        })
+    runtime.spawn(async move {
+        let tcp_listener = TcpListener::bind("0.0.0.0:1337").await.unwrap();
+        loop {
+            let (socket, _) = tcp_listener.accept().await.unwrap();
+            let pixel_map = Arc::clone(&pixel_map);
+            tokio::spawn(async move {
+                handle_connection(socket, pixel_map).await;
+            });
+        }
     });
 
-    render_thread::render_thread(pix_clone, handle);
+    runtime.block_on(render_thread::render_thread(pix_clone, handle));
 }
 
 async fn handle_connection(mut socket: TcpStream, mut pixel_map: Arc<PixelMap>) {
