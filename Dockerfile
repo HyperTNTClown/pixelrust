@@ -1,7 +1,9 @@
+# Node
+FROM node:22 as node_base
 # Build
 FROM rust:bookworm as builder
 RUN rustup target add wasm32-unknown-unknown
-RUN curl -fsSL https://raw.githubusercontent.com/mklement0/n-install/stable/bin/n-install | bash -s 22
+COPY --from=node_base . .
 WORKDIR /build
 COPY . .
 RUN curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
