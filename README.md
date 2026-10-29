@@ -12,7 +12,7 @@ The server listens for TCP connections on port 1337. The server expects the clie
 - `PX x y` - Get the color of the pixel at position (x, y).
 - `QUIT` - Close the connection.
 - `HELP` - Get a list of all commands.
-- `BIN` - Enable binary mode. In binary mode, the server will send the pixel data in binary format. This is useful for sending large amounts of pixel data.
+- `BIN` - Enable binary mode. In binary mode, the server will accept the pixel data from this socket in binary format. This is useful for sending large amounts of pixel data.
 
 Binary mode is disabled by default. To enable it, the client has to send the `BIN` command. The server will then only accept binary data on that socket. To disable binary mode, the client needs to close the connection and open a new one.
 
